@@ -12,7 +12,8 @@
     --light-color: #f8f9fa;
     --dark-color: #343a40;
     --border-color: #dee2e6;
-    --transparent-white: rgba(255, 255, 255, 0.92);
+    /* رنگ جدید به جای سفید شفاف */
+    --transparent-bg: rgba(0, 77, 64, 0.15);
     --transparent-dark: rgba(0, 0, 0, 0.7);
 }
 
@@ -29,13 +30,15 @@ body {
 }
 
 .container {
-    background-color: var(--transparent-white);
+    background-color: var(--transparent-bg);
     border-radius: 10px;
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--secondary-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 a {
@@ -233,7 +236,7 @@ footer a.text-light:hover {
 
 /* کارت ویژگی‌ها */
 .feature-card {
-    background-color: var(--transparent-white);
+    background-color: var(--transparent-bg);
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     padding: 2rem;
@@ -242,6 +245,8 @@ footer a.text-light:hover {
     height: 100%;
     border: 2px solid var(--secondary-light);
     color: var(--text-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .feature-card:hover {
