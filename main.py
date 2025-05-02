@@ -444,6 +444,90 @@ def settings():
     
     return render_template('settings.html')
 
+@app.route('/cancel_all_day', methods=['POST'])
+@login_required
+def cancel_all_day():
+    day = request.form.get('day')
+    
+    if not day:
+        flash('روز مورد نظر مشخص نشده است', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # دریافت اطلاعات دانشجو
+    student = Student.query.filter_by(user_id=str(current_user.id)).first()
+    if not student:
+        flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # دریافت رزروهای روز مورد نظر
+    reservations = Reservation.query.filter_by(
+        student_id=student.id, day=day, delivered=0
+    ).all()
+    
+    if not reservations:
+        # انتخاب نام فارسی روز
+        days = {
+            "saturday": "شنبه",
+            "sunday": "یکشنبه",
+            "monday": "دوشنبه",
+            "tuesday": "سه‌شنبه",
+            "wednesday": "چهارشنبه",
+            "thursday": "پنج‌شنبه",
+            "friday": "جمعه"
+        }
+        flash(f'شما رزرو قابل لغوی برای روز {days.get(day, day)} ندارید', 'warning')
+        return redirect(url_for('dashboard'))
+    
+    # حذف رزروها
+    count = 0
+    for reservation in reservations:
+        db.session.delete(reservation)
+        count += 1
+    
+    db.session.commit()
+    
+    # انتخاب نام فارسی روز
+    days = {
+        "saturday": "شنبه",
+        "sunday": "یکشنبه",
+        "monday": "دوشنبه",
+        "tuesday": "سه‌شنبه",
+        "wednesday": "چهارشنبه",
+        "thursday": "پنج‌شنبه",
+        "friday": "جمعه"
+    }
+    flash(f'{count} رزرو برای روز {days.get(day, day)} با موفقیت لغو شد', 'success')
+    return redirect(url_for('dashboard'))
+
+@app.route('/cancel_all_week', methods=['POST'])
+@login_required
+def cancel_all_week():
+    # دریافت اطلاعات دانشجو
+    student = Student.query.filter_by(user_id=str(current_user.id)).first()
+    if not student:
+        flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # دریافت همه رزروهای قابل لغو
+    reservations = Reservation.query.filter_by(
+        student_id=student.id, delivered=0
+    ).all()
+    
+    if not reservations:
+        flash('شما هیچ رزرو قابل لغوی ندارید', 'warning')
+        return redirect(url_for('dashboard'))
+    
+    # حذف رزروها
+    count = 0
+    for reservation in reservations:
+        db.session.delete(reservation)
+        count += 1
+    
+    db.session.commit()
+    
+    flash(f'{count} رزرو برای کل هفته با موفقیت لغو شد', 'success')
+    return redirect(url_for('dashboard'))
+
 @app.route('/admin/reports')
 @login_required
 def admin_reports():
