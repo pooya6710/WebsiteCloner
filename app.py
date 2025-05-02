@@ -51,7 +51,7 @@ if not secret_key or secret_key == "default_secret_key":
 app.secret_key = secret_key
 
 # تنظیمات امنیتی کوکی‌ها
-app.config["SESSION_COOKIE_SECURE"] = False  # برای توسعه روی Replit نیاز به غیرفعال‌سازی دارد
+app.config["SESSION_COOKIE_SECURE"] = True  # فقط در HTTPS ارسال شود
 app.config["SESSION_COOKIE_HTTPONLY"] = True  # غیرقابل دسترس با JavaScript
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # محافظت در برابر حملات CSRF
 app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # منقضی شدن جلسه بعد از 1 ساعت
@@ -59,10 +59,10 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # منقضی شدن جلسه ب
 # تنظیمات Content Security Policy (CSP)
 app.config["CSP"] = {
     'default-src': "'self'",
-    'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-    'style-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.replit.com",
-    'font-src': "'self' https://cdn.jsdelivr.net https://cdn.replit.com https://fonts.gstatic.com",
-    'img-src': "'self' data: https://cdn.replit.com"
+    'script-src': "'self' https://cdn.jsdelivr.net",
+    'style-src': "'self' https://cdn.jsdelivr.net https://cdn.replit.com",
+    'font-src': "'self' https://cdn.jsdelivr.net",
+    'img-src': "'self' data:"
 }
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -238,7 +238,10 @@ def log_suspicious_requests():
     
     return None  # اجازه ادامه فرآیند درخواست
 
-# در بالا تنظیمات کوکی را برای توسعه روی Replit تنظیم کردیم
+# تنظیمات کوکی‌های جلسه
+# در حالت توسعه (development) تنظیمات امنیتی را به صورت موقت غیرفعال می‌کنیم
+# فقط برای محیط توسعه - در محیط تولید این تنظیمات باید فعال باشند
+app.config["SESSION_COOKIE_SECURE"] = False  # در محیط تولید به True تغییر دهید
 
 # قفل کردن حساب بعد از تعداد مشخصی تلاش ناموفق
 # دیکشنری برای نگهداری تعداد تلاش‌های ناموفق لاگین
