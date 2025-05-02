@@ -1,0 +1,326 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
+  <!-- پس زمینه اصلی با رنگ مات -->
+  <rect width="1000" height="600" fill="#f8f9fa"/>
+  
+  <!-- دیوار سلف با طرح معماری اسلامی -->
+  <rect width="1000" height="180" fill="#f0f7fa"/>
+  
+  <!-- نورگیر سقفی -->
+  <rect x="200" y="20" width="600" height="120" rx="5" ry="5" fill="#e8f4f8" stroke="#ccc" stroke-width="1"/>
+  <path d="M200,80 L800,80" stroke="#ddd" stroke-width="1"/>
+  <path d="M300,20 L300,140" stroke="#ddd" stroke-width="1"/>
+  <path d="M400,20 L400,140" stroke="#ddd" stroke-width="1"/>
+  <path d="M500,20 L500,140" stroke="#ddd" stroke-width="1"/>
+  <path d="M600,20 L600,140" stroke="#ddd" stroke-width="1"/>
+  <path d="M700,20 L700,140" stroke="#ddd" stroke-width="1"/>
+  
+  <!-- طاق‌های اسلامی دیوار -->
+  <path d="M100,175 Q150,120 200,175" fill="none" stroke="#004d40" stroke-width="1" opacity="0.7"/>
+  <path d="M300,175 Q350,120 400,175" fill="none" stroke="#004d40" stroke-width="1" opacity="0.7"/>
+  <path d="M500,175 Q550,120 600,175" fill="none" stroke="#004d40" stroke-width="1" opacity="0.7"/>
+  <path d="M700,175 Q750,120 800,175" fill="none" stroke="#004d40" stroke-width="1" opacity="0.7"/>
+  <path d="M900,175 Q950,120 1000,175" fill="none" stroke="#004d40" stroke-width="1" opacity="0.7"/>
+  
+  <!-- کاشی کاری اسلامی روی دیوار با خطوط ظریف -->
+  <defs>
+    <pattern id="islamic-pattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M0,0 L30,0 L30,30 L0,30 Z" fill="none" stroke="#004d40" stroke-width="0.3" opacity="0.15"/>
+      <path d="M15,0 L30,15 L15,30 L0,15 Z" fill="none" stroke="#004d40" stroke-width="0.3" opacity="0.15"/>
+      <circle cx="15" cy="15" r="5" fill="none" stroke="#004d40" stroke-width="0.3" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="1000" height="180" fill="url(#islamic-pattern)"/>
+  
+  <!-- کف سلف -->
+  <rect y="180" width="1000" height="420" fill="#f5f5f5"/>
+  
+  <!-- خط جداکننده بین دیوار و کف (تزئینی) -->
+  <rect y="180" width="1000" height="3" fill="#004d40" opacity="0.8"/>
+  
+  <!-- دیوار جداکننده وسط سلف -->
+  <rect x="500" y="180" width="4" height="420" fill="#eaeaea" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- علامت‌های راهنما -->
+  <rect x="485" y="200" width="30" height="80" rx="2" ry="2" fill="#004d40" stroke="#01695c" stroke-width="1"/>
+  <text x="500" y="235" font-family="Arial" font-size="9" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">بخش</text>
+  <text x="500" y="250" font-family="Arial" font-size="9" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">خواهران</text>
+  
+  <rect x="485" y="300" width="30" height="80" rx="2" ry="2" fill="#004d40" stroke="#01695c" stroke-width="1"/>
+  <text x="500" y="335" font-family="Arial" font-size="9" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">بخش</text>
+  <text x="500" y="350" font-family="Arial" font-size="9" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">برادران</text>
+  
+  <!-- ورودی سلف سرویس -->
+  <rect x="470" y="180" width="60" height="10" fill="#004d40"/>
+  <text x="500" y="188" font-family="Arial" font-size="8" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">ورودی</text>
+  
+  <!-- بخش سرو غذا (پیشخوان) -->
+  <rect x="380" y="210" width="240" height="50" rx="2" ry="2" fill="#eeeeee" stroke="#cccccc" stroke-width="1"/>
+  <rect x="390" y="220" width="220" height="30" rx="2" ry="2" fill="#f8f8f8" stroke="#cccccc" stroke-width="1"/>
+  
+  <!-- ظروف غذا روی پیشخوان -->
+  <rect x="400" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  <rect x="430" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  <rect x="460" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  <rect x="490" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  <rect x="520" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  <rect x="550" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  <rect x="580" y="225" width="20" height="20" rx="2" ry="2" fill="#ffffff" stroke="#cccccc" stroke-width="0.5"/>
+  
+  <!-- میزهای بخش خواهران (سمت چپ) -->
+  <!-- ردیف اول -->
+  <rect x="80" y="280" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="240" y="280" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="400" y="280" width="80" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- ردیف دوم -->
+  <rect x="80" y="380" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="240" y="380" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="400" y="380" width="80" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- ردیف سوم -->
+  <rect x="80" y="480" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="240" y="480" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="400" y="480" width="80" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- صندلی‌ها در بخش خواهران -->
+  <!-- میز اول ردیف اول -->
+  <rect x="90" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="120" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="150" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="180" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <rect x="90" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="120" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="150" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="180" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <!-- میز دوم ردیف اول -->
+  <rect x="250" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="280" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="310" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="340" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <rect x="250" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="280" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="310" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="340" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <!-- میز اول ردیف دوم -->
+  <rect x="90" y="370" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="120" y="370" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="150" y="370" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="180" y="370" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <rect x="90" y="440" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="120" y="440" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="150" y="440" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="180" y="440" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <!-- میزهای بخش برادران (سمت راست) -->
+  <!-- ردیف اول -->
+  <rect x="520" y="280" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="680" y="280" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="840" y="280" width="80" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- ردیف دوم -->
+  <rect x="520" y="380" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="680" y="380" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="840" y="380" width="80" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- ردیف سوم -->
+  <rect x="520" y="480" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="680" y="480" width="120" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="840" y="480" width="80" height="60" rx="2" ry="2" fill="#f9fafb" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- صندلی‌ها در بخش برادران -->
+  <!-- میز اول ردیف اول -->
+  <rect x="530" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="560" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="590" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="620" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <rect x="530" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="560" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="590" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="620" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <!-- میز دوم ردیف اول -->
+  <rect x="690" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="720" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="750" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="780" y="270" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <rect x="690" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="720" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="750" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  <rect x="780" y="340" width="10" height="10" rx="1" ry="1" fill="#01695c" opacity="0.8"/>
+  
+  <!-- دانشجویان خانم با چادر (سمت چپ) -->
+  <!-- نفر اول -->
+  <g transform="translate(100, 295)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر دوم -->
+  <g transform="translate(130, 295)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر سوم -->
+  <g transform="translate(160, 295)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر چهارم -->
+  <g transform="translate(100, 325)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر پنجم -->
+  <g transform="translate(130, 325)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر ششم -->
+  <g transform="translate(160, 325)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر هفتم -->
+  <g transform="translate(260, 295)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر هشتم -->
+  <g transform="translate(290, 295)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر نهم -->
+  <g transform="translate(320, 295)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- نفر دهم -->
+  <g transform="translate(260, 325)">
+    <ellipse cx="0" cy="-10" rx="7" ry="7" fill="#333" opacity="0.9"/>
+    <path d="M-10,-6 C-8,-10 -4,-12 0,-12 C4,-12 8,-10 10,-6 C12,-2 12,5 0,15 C-12,5 -12,-2 -10,-6 Z" fill="#1a237e" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="5" ry="5" fill="#f5f5f5"/>
+  </g>
+  
+  <!-- دانشجویان آقا (سمت راست) -->
+  <!-- نفر اول -->
+  <g transform="translate(540, 295)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر دوم -->
+  <g transform="translate(570, 295)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر سوم -->
+  <g transform="translate(600, 295)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر چهارم -->
+  <g transform="translate(540, 325)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر پنجم -->
+  <g transform="translate(570, 325)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر ششم -->
+  <g transform="translate(600, 325)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر هفتم -->
+  <g transform="translate(700, 295)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر هشتم -->
+  <g transform="translate(730, 295)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- نفر نهم -->
+  <g transform="translate(760, 295)">
+    <rect x="-5" y="-17" width="10" height="10" rx="5" ry="5" fill="#333"/>
+    <rect x="-5" y="-7" width="10" height="15" fill="#004d40"/>
+  </g>
+  
+  <!-- ظروف غذا روی میزها -->
+  <!-- میز اول خواهران -->
+  <circle cx="100" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="130" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="160" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  
+  <circle cx="100" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="130" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="160" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  
+  <!-- میز دوم خواهران -->
+  <circle cx="260" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="290" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="320" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  
+  <circle cx="260" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="290" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="320" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  
+  <!-- میز اول برادران -->
+  <circle cx="540" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="570" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="600" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  
+  <circle cx="540" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="570" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="600" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  
+  <!-- میز دوم برادران -->
+  <circle cx="700" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="730" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  <circle cx="760" cy="305" r="5" fill="#ffffff" stroke="#ccc" stroke-width="0.5"/>
+  
+  <circle cx="700" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="730" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  <circle cx="760" cy="315" r="3" fill="#eee" stroke="#ccc" stroke-width="0.2"/>
+  
+  <!-- تزئینات دیوار با خط معماری اسلامی -->
+  <path d="M30,40 L30,150 Q100,130 170,150 Q240,170 310,150 Q380,130 450,150 Q520,170 590,150 Q660,130 730,150 Q800,170 870,150 Q940,130 1000,150 L970,40 Z" fill="none" stroke="#004d40" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- نام سالن -->
+  <text x="500" y="560" font-family="Arial" font-size="14" fill="#004d40" text-anchor="middle" dominant-baseline="middle" font-weight="bold">سالن غذاخوری دانشگاه</text>
+</svg>
