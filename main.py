@@ -34,16 +34,16 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
+        feeding_code = request.form.get('username')  # نام فیلد در فرم هنوز username است
         password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=feeding_code).first()
         
-        if user and check_password_hash(user.password_hash, password):
+        if user and check_password_hash(user.password, password):
             login_user(user)
             flash('با موفقیت وارد شدید', 'success')
             return redirect(url_for('dashboard'))
         else:
-            flash('نام کاربری یا رمز عبور اشتباه است', 'danger')
+            flash('کد تغذیه یا رمز عبور اشتباه است', 'danger')
     
     return render_template('login.html')
 

@@ -12,13 +12,20 @@ class User(UserMixin, db.Model):
     
     id = Column(Integer, primary_key=True)
     username = Column(String(64), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
-    password_hash = Column(String(256), nullable=False)
-    is_admin = Column(Boolean, default=False)  # آیا کاربر مدیر سیستم است؟
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    password = Column(String(256), nullable=False)
+    # میتوانیم بعدا این موارد را اضافه کنیم
+    # email = Column(String(120), unique=True, nullable=False)
+    # password_hash = Column(String(256), nullable=False)
+    # is_admin = Column(Boolean, default=False)  # آیا کاربر مدیر سیستم است؟
+    # created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    @property
+    def is_admin(self):
+        # فعلا کاربر admin را به عنوان مدیر در نظر میگیریم
+        return self.username == 'admin'
     
     def __repr__(self):
-        return f"<User(username='{self.username}', email='{self.email}')>"
+        return f"<User(username='{self.username}')>"
 
 class Student(db.Model):
     """مدل دانشجو برای ذخیره‌سازی اطلاعات کاربران"""
@@ -160,9 +167,7 @@ def load_default_menu(db_session):
         if not admin_exists:
             admin_user = User(
                 username='admin',
-                email='admin@example.com',
-                password_hash=generate_password_hash('admin123'),
-                is_admin=True
+                password=generate_password_hash('admin123')
             )
             db_session.add(admin_user)
             db_session.commit()
