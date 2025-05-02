@@ -102,55 +102,131 @@
 {% endblock %}
 
 {% block content %}
-<!-- بخش قهرمان (هدر) -->
-<div class="hero-section">
+<!-- بخش قهرمان (هدر) با طراحی اسلامی -->
+<div class="hero-section" style="border: 3px solid var(--secondary-color); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);">
+    <!-- الگوی تزئینی اسلامی در بالای صفحه -->
+    <div class="text-center mb-4" style="margin-top: -20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+            <path d="M60,10 L70,20 L60,30 L50,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M40,10 L50,20 L40,30 L30,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M80,10 L90,20 L80,30 L70,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <circle cx="60" cy="20" r="5" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+        </svg>
+    </div>
+    
     <h1 class="hero-title">سامانه رزرو غذای دانشگاه</h1>
+    
+    <!-- آیه‌ای از قرآن درباره غذا یا نعمت -->
+    <p class="text-center mb-3" style="font-style: italic; color: var(--secondary-color);">
+        فَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا
+    </p>
+    <p class="text-center mb-3" style="font-size: 0.9rem; color: #ddd;">
+        از آنچه خداوند روزی شما کرده است، حلال و پاکیزه بخورید
+    </p>
+    
     <p class="my-4">به راحتی غذای دلخواه خود را رزرو کنید، وعده‌های غذایی را مدیریت کنید و با یک سیستم ساده و کاربرپسند کار کنید.</p>
+    
     <div class="d-flex justify-content-center my-4">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('menu') }}" class="btn btn-primary mx-2">
+        <a href="{{ url_for('menu') }}" class="btn btn-primary mx-2" style="border: 2px solid var(--secondary-color);">
             <i class="bi bi-calendar-plus me-2"></i>رزرو غذا
         </a>
-        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mx-2">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mx-2" style="border: 2px solid var(--secondary-dark);">
             <i class="bi bi-speedometer2 me-2"></i>داشبورد من
         </a>
         {% else %}
-        <a href="{{ url_for('register') }}" class="btn btn-primary mx-2">
+        <a href="{{ url_for('register') }}" class="btn btn-primary mx-2" style="border: 2px solid var(--secondary-color);">
             <i class="bi bi-person-plus me-2"></i>ثبت‌نام
         </a>
-        <a href="{{ url_for('login') }}" class="btn btn-secondary mx-2">
+        <a href="{{ url_for('login') }}" class="btn btn-secondary mx-2" style="border: 2px solid var(--secondary-dark);">
             <i class="bi bi-box-arrow-in-right me-2"></i>ورود
         </a>
         {% endif %}
     </div>
+    
+    <!-- الگوی تزئینی اسلامی در پایین صفحه -->
+    <div class="text-center mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+            <path d="M60,10 L70,20 L60,30 L50,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M40,10 L50,20 L40,30 L30,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <path d="M80,10 L90,20 L80,30 L70,20 Z" fill="none" stroke="var(--secondary-color)" stroke-width="2"/>
+            <circle cx="60" cy="20" r="5" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+        </svg>
+    </div>
 </div>
 
-<!-- بخش ویژگی‌ها -->
+<!-- بخش ویژگی‌ها - با طراحی اسلامی -->
 <div class="my-5">
-    <h2 class="text-center font-bold text-2xl mb-5">ویژگی‌های سامانه</h2>
+    <!-- عنوان با تزئینات اسلامی -->
+    <div class="text-center mb-4">
+        <h2 class="font-bold text-2xl mb-2" style="color: var(--primary-dark);">ویژگی‌های سامانه</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="180" height="20" viewBox="0 0 180 20" class="mx-auto">
+            <line x1="10" y1="10" x2="80" y2="10" stroke="var(--secondary-color)" stroke-width="2" />
+            <circle cx="90" cy="10" r="5" fill="none" stroke="var(--secondary-color)" stroke-width="1.5" />
+            <line x1="100" y1="10" x2="170" y2="10" stroke="var(--secondary-color)" stroke-width="2" />
+        </svg>
+    </div>
+    
     <div class="grid grid-cols-1 md-grid-cols-3">
-        <div class="feature-card">
-            <i class="bi bi-calendar-check feature-icon"></i>
-            <h3 class="text-xl font-bold mb-2">رزرو آسان</h3>
+        <div class="feature-card" style="border: 2px solid var(--secondary-light); border-radius: 12px;">
+            <i class="bi bi-calendar-check feature-icon" style="color: var(--primary-dark);"></i>
+            <h3 class="text-xl font-bold mb-2" style="color: var(--primary-dark);">رزرو آسان</h3>
             <p>رزرو غذای مورد علاقه خود را در کمتر از چند ثانیه انجام دهید. بدون نیاز به حضور فیزیکی و صف‌های طولانی.</p>
+            <!-- تزئین اسلامی کوچک -->
+            <div class="text-center mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="10" viewBox="0 0 40 10">
+                    <path d="M20,1 L25,5 L20,9 L15,5 Z" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+                </svg>
+            </div>
         </div>
 
-        <div class="feature-card">
-            <i class="bi bi-clock-history feature-icon"></i>
-            <h3 class="text-xl font-bold mb-2">مدیریت رزروها</h3>
+        <div class="feature-card" style="border: 2px solid var(--secondary-light); border-radius: 12px;">
+            <i class="bi bi-clock-history feature-icon" style="color: var(--primary-dark);"></i>
+            <h3 class="text-xl font-bold mb-2" style="color: var(--primary-dark);">مدیریت رزروها</h3>
             <p>رزروهای خود را به راحتی مدیریت کنید، تغییر دهید یا لغو کنید. تاریخچه رزروها همیشه در دسترس شماست.</p>
+            <!-- تزئین اسلامی کوچک -->
+            <div class="text-center mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="10" viewBox="0 0 40 10">
+                    <path d="M20,1 L25,5 L20,9 L15,5 Z" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+                </svg>
+            </div>
         </div>
 
-        <div class="feature-card">
-            <i class="bi bi-journal-text feature-icon"></i>
-            <h3 class="text-xl font-bold mb-2">منوی متنوع</h3>
-            <p>منوی هفتگی متنوع با طیف گسترده‌ای از غذاهای ایرانی و بین‌المللی. هر روز چیز جدیدی امتحان کنید.</p>
+        <div class="feature-card" style="border: 2px solid var(--secondary-light); border-radius: 12px;">
+            <i class="bi bi-journal-text feature-icon" style="color: var(--primary-dark);"></i>
+            <h3 class="text-xl font-bold mb-2" style="color: var(--primary-dark);">منوی متنوع</h3>
+            <p>منوی هفتگی متنوع با طیف گسترده‌ای از غذاهای ایرانی و سالم. هر روز غذای جدیدی را امتحان کنید.</p>
+            <!-- تزئین اسلامی کوچک -->
+            <div class="text-center mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="10" viewBox="0 0 40 10">
+                    <path d="M20,1 L25,5 L20,9 L15,5 Z" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+                </svg>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- بخش آمار -->
-<div class="stats-container">
+<!-- بخش آمار با طراحی اسلامی -->
+<div class="stats-container" style="border: 3px solid var(--secondary-color); position: relative; overflow: hidden;">
+    
+    <!-- تزئینات اسلامی در گوشه‌ها -->
+    <div style="position: absolute; top: 5px; right: 5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <path d="M5,5 L15,15 L5,25 M25,5 L35,15 L25,25" stroke="var(--secondary-color)" fill="none" stroke-width="1" opacity="0.6"/>
+        </svg>
+    </div>
+    <div style="position: absolute; bottom: 5px; left: 5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <path d="M5,5 L15,15 L5,25 M25,5 L35,15 L25,25" stroke="var(--secondary-color)" fill="none" stroke-width="1" opacity="0.6"/>
+        </svg>
+    </div>
+    
+    <!-- عنوان بخش -->
+    <div class="text-center mb-4">
+        <h3 class="font-bold text-xl mb-2" style="color: var(--light-color);">آمار سامانه</h3>
+        <div class="mx-auto" style="width: 120px; height: 2px; background: var(--secondary-color); margin-bottom: 20px;"></div>
+    </div>
+    
     <div class="grid grid-cols-1 md-grid-cols-3">
         <div class="stat-item">
             <div class="stat-number">+<span id="student-count">{{ student_count }}</span></div>
@@ -166,45 +242,71 @@
         </div>
     </div>
     
-    <!-- آمار اصلی کافی است -->
+    <!-- عبارت اسلامی مناسب -->
+    <div class="text-center mt-4" style="font-style: italic; color: var(--secondary-light); font-size: 0.9rem;">
+        بسم الله الرحمن الرحیم
+    </div>
 </div>
 
-<!-- بخش نحوه کار -->
-<div class="steps-section">
-    <h2 class="text-center font-bold text-2xl mb-5">نحوه کار</h2>
+<!-- بخش نحوه کار با طراحی اسلامی -->
+<div class="steps-section my-5">
+    <!-- عنوان با تزئینات اسلامی -->
+    <div class="text-center mb-4">
+        <h2 class="font-bold text-2xl mb-2" style="color: var(--primary-dark);">نحوه کار</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="30" viewBox="0 0 120 30" class="mx-auto">
+            <path d="M40,15 L55,15 M65,15 L80,15" stroke="var(--secondary-color)" stroke-width="2"/>
+            <polygon points="60,5 65,15 60,25 55,15" fill="none" stroke="var(--secondary-color)" stroke-width="1.5"/>
+        </svg>
+    </div>
+    
     <div class="grid grid-cols-1 md-grid-cols-4">
-        <div class="step-item">
-            <div class="step-circle">1</div>
-            <h4 class="font-bold mb-2">ثبت‌نام کنید</h4>
-            <p class="text-light">با کد تغذیه دانشجویی خود ثبت‌نام کنید</p>
+        <div class="step-item" style="padding: 15px; background-color: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 2px solid var(--secondary-light); margin: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+            <div class="step-circle" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border: 2px solid var(--secondary-color);">1</div>
+            <h4 class="font-bold mb-2" style="color: var(--primary-dark);">ثبت‌نام کنید</h4>
+            <p>با کد تغذیه دانشجویی خود ثبت‌نام کنید</p>
         </div>
-        <div class="step-item">
-            <div class="step-circle">2</div>
-            <h4 class="font-bold mb-2">وارد سیستم شوید</h4>
-            <p class="text-light">وارد حساب کاربری خود شوید</p>
+        <div class="step-item" style="padding: 15px; background-color: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 2px solid var(--secondary-light); margin: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+            <div class="step-circle" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border: 2px solid var(--secondary-color);">2</div>
+            <h4 class="font-bold mb-2" style="color: var(--primary-dark);">وارد سیستم شوید</h4>
+            <p>وارد حساب کاربری خود شوید</p>
         </div>
-        <div class="step-item">
-            <div class="step-circle">3</div>
-            <h4 class="font-bold mb-2">انتخاب غذا</h4>
-            <p class="text-light">از منوی هفتگی غذای خود را انتخاب کنید</p>
+        <div class="step-item" style="padding: 15px; background-color: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 2px solid var(--secondary-light); margin: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+            <div class="step-circle" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border: 2px solid var(--secondary-color);">3</div>
+            <h4 class="font-bold mb-2" style="color: var(--primary-dark);">انتخاب غذا</h4>
+            <p>از منوی هفتگی غذای خود را انتخاب کنید</p>
         </div>
-        <div class="step-item">
-            <div class="step-circle">4</div>
-            <h4 class="font-bold mb-2">دریافت غذا</h4>
-            <p class="text-light">در روز مقرر وعده غذایی خود را دریافت کنید</p>
+        <div class="step-item" style="padding: 15px; background-color: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 2px solid var(--secondary-light); margin: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+            <div class="step-circle" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border: 2px solid var(--secondary-color);">4</div>
+            <h4 class="font-bold mb-2" style="color: var(--primary-dark);">دریافت غذا</h4>
+            <p>در روز مقرر وعده غذایی خود را دریافت کنید</p>
         </div>
     </div>
     
-    <div class="text-center mt-5">
+    <!-- تزئین اسلامی قبل از دکمه -->
+    <div class="text-center mt-3 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="20" viewBox="0 0 80 20" class="mx-auto">
+            <path d="M15,10 L30,10 M50,10 L65,10" stroke="var(--secondary-color)" stroke-width="1.5"/>
+            <circle cx="40" cy="10" r="8" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+        </svg>
+    </div>
+    
+    <div class="text-center mt-3">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('menu') }}" class="btn btn-lg btn-primary">
+        <a href="{{ url_for('menu') }}" class="btn btn-lg btn-primary" style="border: 2px solid var(--secondary-color); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
             <i class="bi bi-calendar-plus me-2"></i>مشاهده منوی غذا
         </a>
         {% else %}
-        <a href="{{ url_for('register') }}" class="btn btn-lg btn-primary">
+        <a href="{{ url_for('register') }}" class="btn btn-lg btn-primary" style="border: 2px solid var(--secondary-color); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
             <i class="bi bi-person-plus me-2"></i>شروع کنید
         </a>
         {% endif %}
+    </div>
+    
+    <!-- تزئین اسلامی پایین بخش -->
+    <div class="text-center mt-5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="20" viewBox="0 0 120 20" class="mx-auto">
+            <path d="M10,10 L110,10" stroke="var(--secondary-color)" stroke-width="1" stroke-dasharray="2,2"/>
+        </svg>
     </div>
 </div>
 {% endblock %}
