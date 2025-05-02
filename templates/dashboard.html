@@ -95,8 +95,15 @@
             
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h3>رزروهای من</h3>
+                        {% if reservations %}
+                        <div>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelAllModal">
+                                <i class="bi bi-trash"></i> لغو همه‌ی رزروها
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="card-body">
                         {% if reservations %}
@@ -163,6 +170,46 @@
         </div>
     </footer>
     
+    <!-- مدال لغو همه رزروها -->
+    <div class="modal fade" id="cancelAllModal" tabindex="-1" aria-labelledby="cancelAllModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="cancelAllModalLabel">لغو همه رزروها</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>شما می‌توانید رزروهای خود را بر اساس گزینه‌های زیر لغو کنید:</p>
+                    <div class="d-grid gap-3 mt-3">
+                        <!-- روزهای مختلف هفته -->
+                        {% set days = { 'saturday': 'شنبه', 'sunday': 'یکشنبه', 'monday': 'دوشنبه', 'tuesday': 'سه‌شنبه', 'wednesday': 'چهارشنبه', 'thursday': 'پنج‌شنبه', 'friday': 'جمعه' } %}
+                        
+                        {% for day_name, day_label in days.items() %}
+                        <form action="{{ url_for('cancel_all_day') }}" method="POST">
+                            <input type="hidden" name="day" value="{{ day_name }}">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-calendar-x"></i> لغو تمام رزروهای {{ day_label }}
+                            </button>
+                        </form>
+                        {% endfor %}
+                        
+                        <hr>
+                        
+                        <!-- لغو همه رزروهای هفته -->
+                        <form action="{{ url_for('cancel_all_week') }}" method="POST">
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="bi bi-calendar-x"></i> لغو تمام رزروهای هفته
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- جاوااسکریپت بوت‌استرپ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -169,6 +169,72 @@ def reserve():
     flash(f'رزرو شما برای {day} وعده {meal} با موفقیت ثبت شد', 'success')
     return redirect(url_for('dashboard'))
 
+@app.route('/reserve_all_day', methods=['POST'])
+@login_required
+def reserve_all_day():
+    day = request.form.get('day')
+    
+    if not day:
+        flash('روز مورد نظر مشخص نشده است', 'danger')
+        return redirect(url_for('menu'))
+    
+    # دریافت اطلاعات دانشجو
+    student = Student.query.filter_by(user_id=str(current_user.id)).first()
+    if not student:
+        flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
+        return redirect(url_for('menu'))
+    
+    # دریافت منوی روز مورد نظر
+    day_menu = Menu.query.filter_by(day=day).first()
+    if not day_menu:
+        flash(f'منوی روز {day} یافت نشد', 'danger')
+        return redirect(url_for('menu'))
+    
+    meal_data = day_menu.meal_data
+    success_count = 0
+    already_reserved = 0
+    
+    # وعده‌های غذایی
+    meals = ['breakfast', 'lunch', 'dinner']
+    
+    for meal in meals:
+        # بررسی اینکه این وعده در منو وجود داشته باشد و حداقل یک غذا داشته باشد
+        if meal in meal_data and meal_data[meal] and len(meal_data[meal]) > 0:
+            # بررسی رزرو قبلی
+            existing_reservation = Reservation.query.filter_by(
+                student_id=student.id, day=day, meal=meal
+            ).first()
+            
+            if existing_reservation:
+                already_reserved += 1
+                continue
+            
+            # انتخاب اولین غذای هر وعده
+            food_name = meal_data[meal][0]
+            
+            # ایجاد رزرو جدید
+            new_reservation = Reservation(
+                student_id=student.id,
+                day=day,
+                meal=meal,
+                food_name=food_name,
+                delivered=0
+            )
+            db.session.add(new_reservation)
+            success_count += 1
+    
+    if success_count > 0:
+        db.session.commit()
+        meal_fa = 'وعده' if success_count == 1 else 'وعده'
+        flash(f'{success_count} {meal_fa} غذا برای روز {day} با موفقیت رزرو شد', 'success')
+    else:
+        if already_reserved > 0:
+            flash(f'شما قبلاً تمام وعده‌های روز {day} را رزرو کرده‌اید', 'warning')
+        else:
+            flash(f'هیچ وعده‌ای برای روز {day} رزرو نشد', 'warning')
+    
+    return redirect(url_for('dashboard'))
+
 @app.route('/cancel_reservation/<int:reservation_id>', methods=['POST'])
 @login_required
 def cancel_reservation(reservation_id):
@@ -289,6 +355,66 @@ def admin_delivery(reservation_id):
     
     flash('وضعیت تحویل غذا با موفقیت به‌روزرسانی شد', 'success')
     return redirect(url_for('admin_reservations'))
+
+@app.route('/reserve_all_week', methods=['POST'])
+@login_required
+def reserve_all_week():
+    # دریافت اطلاعات دانشجو
+    student = Student.query.filter_by(user_id=str(current_user.id)).first()
+    if not student:
+        flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
+        return redirect(url_for('menu'))
+    
+    # دریافت منوی هفتگی
+    weekly_menu = Menu.query.all()
+    if not weekly_menu:
+        flash('منوی هفتگی یافت نشد', 'danger')
+        return redirect(url_for('menu'))
+    
+    success_count = 0
+    already_reserved = 0
+    
+    # وعده‌های غذایی
+    meals = ['breakfast', 'lunch', 'dinner']
+    
+    for day_menu in weekly_menu:
+        for meal in meals:
+            # بررسی اینکه این وعده در منو وجود داشته باشد و حداقل یک غذا داشته باشد
+            if meal in day_menu.meal_data and day_menu.meal_data[meal] and len(day_menu.meal_data[meal]) > 0:
+                # بررسی رزرو قبلی
+                existing_reservation = Reservation.query.filter_by(
+                    student_id=student.id, day=day_menu.day, meal=meal
+                ).first()
+                
+                if existing_reservation:
+                    already_reserved += 1
+                    continue
+                
+                # انتخاب اولین غذای هر وعده
+                food_name = day_menu.meal_data[meal][0]
+                
+                # ایجاد رزرو جدید
+                new_reservation = Reservation(
+                    student_id=student.id,
+                    day=day_menu.day,
+                    meal=meal,
+                    food_name=food_name,
+                    delivered=0
+                )
+                db.session.add(new_reservation)
+                success_count += 1
+    
+    if success_count > 0:
+        db.session.commit()
+        meal_fa = 'وعده' if success_count == 1 else 'وعده'
+        flash(f'{success_count} {meal_fa} غذا برای کل هفته با موفقیت رزرو شد', 'success')
+    else:
+        if already_reserved > 0:
+            flash('شما قبلاً تمام وعده‌های هفته را رزرو کرده‌اید', 'warning')
+        else:
+            flash('هیچ وعده‌ای برای هفته رزرو نشد', 'warning')
+    
+    return redirect(url_for('dashboard'))
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
