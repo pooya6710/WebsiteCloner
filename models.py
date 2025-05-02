@@ -1,7 +1,7 @@
 import json
 import os
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, JSON, Text, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, JSON, Text, Boolean, Float
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from app import db, logger
@@ -27,9 +27,13 @@ class Student(db.Model):
     id = Column(Integer, primary_key=True)
     user_id = Column(String(50), unique=True, nullable=False)  # ارتباط با کاربر
     feeding_code = Column(String(20), unique=True, nullable=False)  # کد تغذیه دانشجویی
+    credit = Column(Float, default=0.0)  # اعتبار حساب دانشجو (به تومان)
     
     # ارتباط با رزروها
     reservations = relationship("Reservation", back_populates="student", cascade="all, delete-orphan")
+    
+    # ارتباط با پرداخت‌ها
+    payments = relationship("Payment", back_populates="student")
     
     def __repr__(self):
         return f"<Student(user_id='{self.user_id}', feeding_code='{self.feeding_code}')>"
@@ -62,6 +66,26 @@ class Menu(db.Model):
     
     def __repr__(self):
         return f"<Menu(day='{self.day}')>"
+
+class Payment(db.Model):
+    """مدل پرداخت برای ذخیره‌سازی تراکنش‌های مالی"""
+    __tablename__ = 'payments'
+    
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey('students.id'), nullable=False)
+    amount = Column(Float, nullable=False)  # مبلغ پرداخت به تومان
+    description = Column(Text, nullable=True)  # توضیحات پرداخت
+    authority = Column(String(128), nullable=True)  # شناسه ارجاع به درگاه پرداخت
+    ref_id = Column(String(128), nullable=True)  # شناسه پیگیری درگاه پرداخت
+    status = Column(String(20), default='pending')  # وضعیت پرداخت: pending, success, failed
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    reservation_ids = Column(Text, nullable=True)  # شناسه‌های رزروهای مرتبط با این پرداخت (به صورت comma-separated)
+    
+    # ارتباط با دانشجو
+    student = relationship("Student", back_populates="payments")
+    
+    def __repr__(self):
+        return f"<Payment(student_id={self.student_id}, amount={self.amount}, status='{self.status}')>"
 
 class DatabaseBackup(db.Model):
     """مدل پشتیبان‌گیری از دیتابیس"""
