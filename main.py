@@ -338,22 +338,40 @@ def admin_update_menu():
     
     day = request.form.get('day')
     meal = request.form.get('meal')
-    food_items = request.form.get('food_items').split('\n')
-    food_items = [item.strip() for item in food_items if item.strip()]
+    food_items_text = request.form.get('food_items')
+    food_items = [item.strip() for item in food_items_text.split('\n') if item.strip()]
     
-    # دریافت منوی روز مورد نظر
-    day_menu = Menu.query.filter_by(day=day).first()
-    if not day_menu:
-        flash(f'منوی روز {day} یافت نشد', 'danger')
-        return redirect(url_for('admin_menu'))
+    try:
+        # دریافت منوی روز مورد نظر
+        day_menu = Menu.query.filter_by(day=day).first()
+        if not day_menu:
+            flash(f'منوی روز {day} یافت نشد', 'danger')
+            return redirect(url_for('admin_menu'))
+        
+        # بررسی وجود meal_data
+        if day_menu.meal_data is None:
+            day_menu.meal_data = {}
+        
+        # اگر meal_data رشته است، آن را به دیکشنری تبدیل کنید
+        if isinstance(day_menu.meal_data, str):
+            import json
+            try:
+                day_menu.meal_data = json.loads(day_menu.meal_data)
+            except:
+                day_menu.meal_data = {}
+        
+        # به‌روزرسانی منو
+        meal_data = dict(day_menu.meal_data)  # کپی می‌کنیم تا اطمینان یابیم دیکشنری است
+        meal_data[meal] = food_items
+        day_menu.meal_data = meal_data
+        
+        db.session.commit()
+        flash(f'منوی {meal} روز {day} با موفقیت به‌روزرسانی شد', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'خطا در به‌روزرسانی منو: {str(e)}', 'danger')
+        print(f'Error updating menu: {str(e)}')
     
-    # به‌روزرسانی منو
-    meal_data = day_menu.meal_data
-    meal_data[meal] = food_items
-    day_menu.meal_data = meal_data
-    db.session.commit()
-    
-    flash(f'منوی {meal} روز {day} با موفقیت به‌روزرسانی شد', 'success')
     return redirect(url_for('admin_menu'))
 
 @app.route('/admin/delivery/<int:reservation_id>', methods=['POST'])
