@@ -1,10 +1,11 @@
 import datetime
 import os
+import time
 from flask import request, jsonify, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import app, db, login_manager, logger
+from app import app, db, login_manager, logger, login_attempts, max_login_attempts, login_timeout
 from zarinpal import ZarinPal
 
 # درگاه پرداخت زرین‌پال
@@ -69,14 +70,52 @@ def login():
     if request.method == 'POST':
         feeding_code = request.form.get('username')  # نام فیلد در فرم هنوز username است
         password = request.form.get('password')
+        
+        # بررسی قفل حساب کاربری
+        client_ip = request.remote_addr
+        current_time = time.time()
+        
+        # پاک کردن رکوردهای منقضی شده تلاش‌های ناموفق
+        for ip in list(login_attempts.keys()):
+            if current_time - login_attempts[ip]['timestamp'] > login_timeout:
+                del login_attempts[ip]
+        
+        # بررسی وضعیت قفل حساب برای آدرس IP فعلی
+        if client_ip in login_attempts and login_attempts[client_ip]['attempts'] >= max_login_attempts:
+            # بررسی زمان قفل
+            time_passed = current_time - login_attempts[client_ip]['timestamp']
+            if time_passed < login_timeout:
+                remaining_time = int((login_timeout - time_passed) / 60)
+                flash(f'حساب کاربری شما به دلیل تلاش‌های ناموفق قفل شده است. لطفاً {remaining_time} دقیقه دیگر امتحان کنید.', 'danger')
+                return render_template('login.html')
+            else:
+                # زمان قفل به پایان رسیده است
+                del login_attempts[client_ip]
+        
         user = User.query.filter_by(username=feeding_code).first()
         
         if user and check_password_hash(user.password, password):
+            # ورود موفق - پاک کردن سابقه تلاش‌های ناموفق
+            if client_ip in login_attempts:
+                del login_attempts[client_ip]
+            
             login_user(user)
             flash('با موفقیت وارد شدید', 'success')
             return redirect(url_for('dashboard'))
         else:
-            flash('کد تغذیه یا رمز عبور اشتباه است', 'danger')
+            # ورود ناموفق - افزایش شمارنده تلاش‌های ناموفق
+            if client_ip not in login_attempts:
+                login_attempts[client_ip] = {'attempts': 1, 'timestamp': current_time}
+            else:
+                login_attempts[client_ip]['attempts'] += 1
+                login_attempts[client_ip]['timestamp'] = current_time
+            
+            # اعلان تعداد تلاش‌های باقی‌مانده
+            remaining_attempts = max_login_attempts - login_attempts[client_ip]['attempts']
+            if remaining_attempts > 0:
+                flash(f'کد تغذیه یا رمز عبور اشتباه است. {remaining_attempts} تلاش دیگر باقی مانده است.', 'danger')
+            else:
+                flash(f'حساب کاربری شما به مدت {int(login_timeout/60)} دقیقه قفل شده است.', 'danger')
     
     return render_template('login.html')
 
