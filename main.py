@@ -290,6 +290,20 @@ def admin_reservations():
     reservations = Reservation.query.all()
     return render_template('admin_reservations.html', reservations=reservations)
 
+@app.route('/admin/student/<int:student_id>/reservations')
+@login_required
+def admin_student_reservations(student_id):
+    if not current_user.is_admin:
+        flash('شما دسترسی به این بخش را ندارید', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    student = Student.query.get_or_404(student_id)
+    reservations = Reservation.query.filter_by(student_id=student_id).all()
+    
+    return render_template('admin_student_reservations.html', 
+                           student=student, 
+                           reservations=reservations)
+
 @app.route('/admin/menu')
 @login_required
 def admin_menu():

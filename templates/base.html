@@ -191,6 +191,7 @@
                     </li>
                     
                     {% if current_user.is_authenticated %}
+                    {% if not current_user.is_admin %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('dashboard') %}active{% endif %}" href="{{ url_for('dashboard') }}">
                             <i class="bi bi-speedometer2 me-1"></i>داشبورد
@@ -201,6 +202,7 @@
                             <i class="bi bi-calendar-check me-1"></i>رزرو غذا
                         </a>
                     </li>
+                    {% endif %}
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -279,8 +281,10 @@
                     <ul class="list-unstyled">
                         <li><a href="{{ url_for('index') }}" class="text-light">صفحه اصلی</a></li>
                         {% if current_user.is_authenticated %}
+                        {% if not current_user.is_admin %}
                         <li><a href="{{ url_for('dashboard') }}" class="text-light">داشبورد</a></li>
                         <li><a href="{{ url_for('menu') }}" class="text-light">رزرو غذا</a></li>
+                        {% endif %}
                         {% else %}
                         <li><a href="{{ url_for('login') }}" class="text-light">ورود</a></li>
                         <li><a href="{{ url_for('register') }}" class="text-light">ثبت‌نام</a></li>
