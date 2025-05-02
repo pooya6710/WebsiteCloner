@@ -1,0 +1,140 @@
+/* استایل‌های سفارشی سامانه رزرو غذا */
+
+/* استایل عمومی برای کل صفحه */
+body {
+    font-family: 'Vazirmatn', tahoma, Arial, sans-serif;
+}
+
+/* حاشیه برای بخش اصلی */
+.container {
+    max-width: 1200px;
+}
+
+/* رنگ پس زمینه نوار بالا */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* استایل کارت‌ها */
+.card {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* استایل دکمه‌ها */
+.btn {
+    border-radius: 5px;
+}
+
+/* استایل جدول‌ها */
+.table th {
+    font-weight: bold;
+}
+
+/* استایل فوتر */
+footer {
+    margin-top: 3rem;
+}
+
+/* انیمیشن برای دکمه‌های رزرو */
+.btn-primary {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* استایل برای نشانه‌های وضعیت */
+.badge {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+/* استایل الرت‌ها */
+.alert {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* استایل تب‌ها در صفحه منو */
+.nav-tabs .nav-link {
+    font-weight: 500;
+    color: var(--bs-body-color);
+    padding: 10px 15px;
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+/* استایل آیتم‌های غذا در منو */
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+}
+
+/* استایل فرم‌ها */
+.form-control {
+    padding: 10px 12px;
+    border-radius: 5px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* استایل برای صفحه اصلی */
+.jumbotron {
+    padding: 3rem 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.jumbotron h1 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* استایل برای ایکون‌های جذاب */
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--bs-primary);
+}
+
+/* استایل برای داشبورد */
+.dashboard-stat {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-stat i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-stat h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.dashboard-stat p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+}

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه رزرو غذای دانشگاه</title>
+    <!-- فونت وزیر متن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بوت‌استرپ با تم دارک Replit -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- آیکون‌های Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- استایل‌های سفارشی -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* استایل‌های اختصاصی صفحه اصلی */
+        .hero-section {
+            background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-indigo) 100%);
+            padding: 6rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-hero {
+            padding: 12px 25px;
+            font-weight: 500;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+        
+        .btn-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero-image {
+            max-width: 90%;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
+        }
+        
+        .stats-section {
+            background-color: var(--bs-dark);
+            padding: 3rem 0;
+            margin: 4rem 0;
+            border-radius: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--bs-primary);
+        }
+        
+        .testimonial-card {
+            background-color: var(--bs-dark);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .testimonial-card::before {
+            content: '\201C';
+            font-size: 6rem;
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            color: var(--bs-primary);
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+    <!-- نوار ناوبری -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-cup-hot me-2"></i>
+                سامانه رزرو غذای دانشگاه
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('index') }}">صفحه اصلی</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">داشبورد من</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('menu') }}">منوی غذا</a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin') }}">پنل مدیریت</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                <div class="d-flex">
+                    {% if current_user.is_authenticated %}
+                    <span class="navbar-text ms-3">
+                        <i class="bi bi-person-fill"></i> {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger ms-2">خروج</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2">ورود</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">ثبت‌نام</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- پیام‌ها و اخطارها -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- بخش قهرمان (هدر) -->
+    <div class="hero-section text-white text-center">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 text-lg-end order-lg-2 mb-5 mb-lg-0">
+                    <img src="{{ url_for('static', filename='images/hero-food.svg') }}" alt="رزرو غذا" class="hero-image" onerror="this.src='https://img.icons8.com/clouds/400/000000/meal.png'; this.onerror=null;">
+                </div>
+                <div class="col-lg-6 text-lg-start order-lg-1">
+                    <h1 class="display-4 fw-bold mb-4">سامانه رزرو غذای دانشگاه</h1>
+                    <p class="lead mb-5">به راحتی غذای دلخواه خود را رزرو کنید، وعده‌های غذایی را مدیریت کنید و با یک سیستم ساده و کاربرپسند کار کنید.</p>
+                    <div class="d-flex justify-content-center justify-content-lg-start">
+                        {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('menu') }}" class="btn btn-light btn-hero">
+                            <i class="bi bi-calendar-plus me-2"></i>رزرو غذا
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-warning btn-hero">
+                            <i class="bi bi-speedometer2 me-2"></i>داشبورد من
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-light btn-hero">
+                            <i class="bi bi-person-plus me-2"></i>ثبت‌نام
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-warning btn-hero">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>ورود
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش ویژگی‌ها -->
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">ویژگی‌های سامانه</h2>
+            <p class="lead text-muted">چرا از سامانه رزرو غذای دانشگاه استفاده کنیم؟</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-check feature-icon text-primary"></i>
+                        <h3 class="card-title">رزرو آسان</h3>
+                        <p class="card-text">رزرو غذای مورد علاقه خود را در کمتر از چند ثانیه انجام دهید. بدون نیاز به حضور فیزیکی و صف‌های طولانی.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clock-history feature-icon text-primary"></i>
+                        <h3 class="card-title">مدیریت رزروها</h3>
+                        <p class="card-text">رزروهای خود را به راحتی مدیریت کنید، تغییر دهید یا لغو کنید. تاریخچه رزروها همیشه در دسترس شماست.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-text feature-icon text-primary"></i>
+                        <h3 class="card-title">منوی متنوع</h3>
+                        <p class="card-text">منوی هفتگی متنوع با طیف گسترده‌ای از غذاهای ایرانی و بین‌المللی. هر روز چیز جدیدی امتحان کنید.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش آمار -->
+    <div class="stats-section">
+        <div class="container">
+            <div class="row text-center text-white">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="stat-number">+<span id="student-count">500</span></div>
+                    <p class="lead">دانشجوی فعال</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="stat-number">+<span id="meal-count">1000</span></div>
+                    <p class="lead">وعده غذایی سرو شده</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-number">+<span id="food-count">50</span></div>
+                    <p class="lead">نوع غذای مختلف</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش نحوه کار -->
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">نحوه کار</h2>
+            <p class="lead text-muted">در چند مرحله ساده غذای مورد علاقه خود را رزرو کنید</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <h3 class="mb-0">1</h3>
+                    </div>
+                    <h4 class="text-center">ثبت‌نام کنید</h4>
+                    <p class="text-center text-muted">با کد تغذیه دانشجویی خود ثبت‌نام کنید</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <h3 class="mb-0">2</h3>
+                    </div>
+                    <h4 class="text-center">وارد سیستم شوید</h4>
+                    <p class="text-center text-muted">وارد حساب کاربری خود شوید</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <h3 class="mb-0">3</h3>
+                    </div>
+                    <h4 class="text-center">انتخاب غذا</h4>
+                    <p class="text-center text-muted">از منوی هفتگی غذای خود را انتخاب کنید</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <h3 class="mb-0">4</h3>
+                    </div>
+                    <h4 class="text-center">دریافت غذا</h4>
+                    <p class="text-center text-muted">در روز مقرر وعده غذایی خود را دریافت کنید</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('menu') }}" class="btn btn-lg btn-primary">
+                <i class="bi bi-calendar-plus me-2"></i>مشاهده منوی غذا
+            </a>
+            {% else %}
+            <a href="{{ url_for('register') }}" class="btn btn-lg btn-primary">
+                <i class="bi bi-person-plus me-2"></i>شروع کنید
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3">درباره ما</h5>
+                    <p class="mb-0">سامانه رزرو غذای دانشگاه برای تسهیل فرآیند رزرو و مدیریت غذای دانشجویان طراحی شده است.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3">لینک‌های مفید</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{{ url_for('index') }}" class="text-light text-decoration-none">صفحه اصلی</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li class="mb-2"><a href="{{ url_for('dashboard') }}" class="text-light text-decoration-none">داشبورد من</a></li>
+                        <li class="mb-2"><a href="{{ url_for('menu') }}" class="text-light text-decoration-none">منوی غذا</a></li>
+                        {% else %}
+                        <li class="mb-2"><a href="{{ url_for('login') }}" class="text-light text-decoration-none">ورود</a></li>
+                        <li class="mb-2"><a href="{{ url_for('register') }}" class="text-light text-decoration-none">ثبت‌نام</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="mb-3">تماس با ما</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>آدرس: دانشگاه شهید بهشتی</li>
+                        <li class="mb-2"><i class="bi bi-telephone me-2"></i>تلفن: 021-12345678</li>
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i>ایمیل: food@university.ac.ir</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="mb-0">سامانه رزرو غذای دانشگاه - طراحی شده با ❤️ | &copy; {{ now.year }}</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- جاوااسکریپت بوت‌استرپ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- اسکریپت شمارنده برای بخش آمار -->
+    <script>
+        function animateCount(elementId, finalCount, duration = 2000) {
+            const element = document.getElementById(elementId);
+            let startTime = null;
+            const startCount = 0;
+            
+            function updateCount(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const currentCount = Math.floor(progress * (finalCount - startCount) + startCount);
+                element.innerText = currentCount;
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(updateCount);
+                } else {
+                    element.innerText = finalCount;
+                }
+            }
+            
+            window.requestAnimationFrame(updateCount);
+        }
+        
+        // شروع انیمیشن هنگام اسکرول به بخش آمار
+        const statsSection = document.querySelector('.stats-section');
+        const options = {
+            threshold: 0.5
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCount('student-count', 500);
+                    animateCount('meal-count', 1000);
+                    animateCount('food-count', 50);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+        
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+    </script>
+</body>
+</html>
