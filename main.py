@@ -439,50 +439,83 @@ def admin_update_menu():
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
+    # دریافت و بررسی داده‌های فرم
     day = request.form.get('day')
     meal = request.form.get('meal')
     food_items_text = request.form.get('food_items')
+    
+    # بررسی اعتبار داده‌های ورودی
+    if not day or not meal:
+        flash('روز و وعده غذایی باید مشخص شوند', 'danger')
+        return redirect(url_for('admin_menu'))
+    
+    # پردازش لیست غذاها
     food_items = [item.strip() for item in food_items_text.split('\n') if item.strip()]
     
     try:
-        # برای دیباگ، اطلاعات ارسالی را لاگ می‌کنیم
-        print(f"Updating menu - Day: {day}, Meal: {meal}, Food items: {food_items}")
+        # لاگ اطلاعات ورودی برای دیباگ
+        print(f"Updating menu - Day: {day}, Meal: {meal}")
+        print(f"Food items: {food_items}")
         
         # دریافت منوی روز مورد نظر
         day_menu = Menu.query.filter_by(day=day).first()
         if not day_menu:
+            print(f"Creating new menu for day: {day}")
             flash(f'منوی روز {day} یافت نشد - در حال ایجاد منوی جدید', 'warning')
             # ایجاد یک منوی جدید برای این روز
-            day_menu = Menu(day=day, meal_data={})
+            day_menu = Menu(day=day, meal_data={
+                "breakfast": [],
+                "lunch": [],
+                "dinner": []
+            })
             db.session.add(day_menu)
+            db.session.flush()  # برای دریافت ID جدید
+            print(f"Created new menu with ID: {day_menu.id}")
+        else:
+            print(f"Found existing menu for day: {day}, ID: {day_menu.id}")
+            print(f"Current meal_data: {day_menu.meal_data}")
         
-        # تضمین اینکه meal_data یک دیکشنری است
+        # تضمین اینکه meal_data یک دیکشنری معتبر است
         current_data = {}
         if day_menu.meal_data:
             if isinstance(day_menu.meal_data, dict):
                 current_data = day_menu.meal_data
+                print(f"meal_data is valid dictionary")
             elif isinstance(day_menu.meal_data, str):
                 import json
                 try:
                     current_data = json.loads(day_menu.meal_data)
+                    print(f"Converted string meal_data to dictionary")
                 except json.JSONDecodeError as e:
                     print(f"JSON decode error: {str(e)}")
                     current_data = {}
+            else:
+                print(f"Unknown meal_data type: {type(day_menu.meal_data)}")
+                current_data = {}
+        else:
+            print("meal_data is None or empty, initializing new dictionary")
         
         # وعده‌های غذایی پیش‌فرض را اضافه می‌کنیم اگر وجود نداشته باشند
         for meal_name in ['breakfast', 'lunch', 'dinner']:
             if meal_name not in current_data:
                 current_data[meal_name] = []
+                print(f"Added missing meal type: {meal_name}")
         
         # به‌روزرسانی منو برای وعده مورد نظر
-        current_data[meal] = food_items
+        print(f"Updating menu for meal: {meal} with items: {food_items}")
+        current_data[meal] = food_items.copy()
+        
+        # بررسی و لاگ داده‌های جدید
+        print(f"New meal_data structure: {current_data}")
         day_menu.meal_data = current_data
         
         # کامیت کردن تغییرات به دیتابیس
         db.session.commit()
+        print(f"Successfully committed changes to database")
         
-        # برای دیباگ، منوی به‌روزرسانی شده را لاگ می‌کنیم
-        print(f"Updated menu data: {day_menu.meal_data}")
+        # تایید نهایی تغییرات
+        updated_menu = Menu.query.get(day_menu.id)
+        print(f"Verification - Updated menu data: {updated_menu.meal_data}")
         
         flash(f'منوی {meal} روز {day} با موفقیت به‌روزرسانی شد', 'success')
     except Exception as e:
@@ -490,7 +523,8 @@ def admin_update_menu():
         # لاگ خطا با جزئیات بیشتر
         import traceback
         error_details = traceback.format_exc()
-        print(f"Error updating menu: {str(e)}\n{error_details}")
+        print(f"ERROR updating menu: {str(e)}")
+        print(f"Traceback: {error_details}")
         flash(f'خطا در به‌روزرسانی منو: {str(e)}', 'danger')
     
     return redirect(url_for('admin_menu'))
@@ -641,15 +675,16 @@ def cancel_all_day():
     db.session.commit()
     
     # انتخاب نام فارسی روز
-    days = {
-        "saturday": "شنبه",
-        "sunday": "یکشنبه",
-        "monday": "دوشنبه",
-        "tuesday": "سه‌شنبه",
-        "wednesday": "چهارشنبه",
-        "thursday": "پنج‌شنبه",
-        "friday": "جمعه"
-    }
+    # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
+    days = OrderedDict([
+        ("saturday", "شنبه"),
+        ("sunday", "یکشنبه"),
+        ("monday", "دوشنبه"),
+        ("tuesday", "سه‌شنبه"),
+        ("wednesday", "چهارشنبه"),
+        ("thursday", "پنج‌شنبه"),
+        ("friday", "جمعه")
+    ])
     flash(f'{count} رزرو برای روز {days.get(day, day)} با موفقیت لغو شد', 'success')
     return redirect(url_for('dashboard'))
 
@@ -707,18 +742,27 @@ def admin_reports():
         })
     
     # آمار رزروها بر اساس روزهای هفته
-    days = {
-        "saturday": "شنبه",
-        "sunday": "یکشنبه",
-        "monday": "دوشنبه",
-        "tuesday": "سه‌شنبه",
-        "wednesday": "چهارشنبه",
-        "thursday": "پنج‌شنبه",
-        "friday": "جمعه"
-    }
+    # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
+    days = OrderedDict([
+        ("saturday", "شنبه"),
+        ("sunday", "یکشنبه"),
+        ("monday", "دوشنبه"),
+        ("tuesday", "سه‌شنبه"),
+        ("wednesday", "چهارشنبه"),
+        ("thursday", "پنج‌شنبه"),
+        ("friday", "جمعه")
+    ])
     
-    # مرتب‌سازی ترتیب روزهای هفته
-    day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
+    # مرتب‌سازی ترتیب روزهای هفته (شنبه در ابتدا)
+    day_order = OrderedDict([
+        ("saturday", 0),
+        ("sunday", 1),
+        ("monday", 2),
+        ("tuesday", 3),
+        ("wednesday", 4),
+        ("thursday", 5),
+        ("friday", 6)
+    ])
     
     # آمار ترکیبی روز و وعده‌های غذایی
     day_meal_stats = db.session.query(
