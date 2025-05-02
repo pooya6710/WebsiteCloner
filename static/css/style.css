@@ -1,28 +1,38 @@
-/* استایل‌های سفارشی برای سامانه رزرو غذا */
+/* استایل‌های اصلی سامانه رزرو غذا */
 
 :root {
-    /* رنگ‌های اسلامی مناسب */
-    --primary-color: #006064; /* سبز آبی تیره */
-    --primary-dark: #004d40; /* سبز تیره */
-    --primary-light: #80cbc4; /* سبز آبی روشن */
-    --secondary-color: #e8b835; /* طلایی اسلامی */
-    --secondary-dark: #c6980a; /* طلایی تیره */
-    --secondary-light: #f8d175; /* طلایی روشن */
-    --accent-color: #00897b; /* آکسنت سبز */
+    --primary-color: #004d40;
+    --primary-dark: #00332b;
+    --primary-light: #39796b;
+    --secondary-color: #e8b835;
+    --secondary-dark: #c99b20;
+    --secondary-light: #ffd54f;
+    --accent-color: #e74c3c;
     --text-color: #333333;
     --light-color: #f8f9fa;
-    --dark-color: #004d40; /* مطابق با رنگ اصلی */
-    --border-color: #e8b835; /* رنگ حاشیه طلایی */
+    --dark-color: #343a40;
+    --border-color: #dee2e6;
 }
 
 body {
     font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     color: var(--text-color);
-    background-color: #f5f5f5;
+    background-color: var(--primary-dark);
     background-image: url('/static/images/islamic-pattern.svg');
     background-attachment: fixed;
     background-size: cover;
     line-height: 1.6;
+    direction: rtl;
+    text-align: right;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.92);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 a {
@@ -33,18 +43,20 @@ a {
 
 a:hover {
     color: var(--primary-dark);
+    text-decoration: none;
 }
 
 /* نوار ناوبری */
 .navbar {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     padding: 1rem 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
+    color: white;
 }
 
 .navbar-dark .navbar-nav .nav-link {
@@ -65,34 +77,25 @@ a:hover {
 .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    color: white;
 }
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
+    color: white;
 }
 
 .btn-secondary {
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
+    color: var(--dark-color);
 }
 
 .btn-secondary:hover {
     background-color: var(--secondary-dark);
     border-color: var(--secondary-dark);
-}
-
-.btn-grad {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    border: none;
-    color: white;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.btn-grad:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    color: white;
+    color: var(--dark-color);
 }
 
 /* کارت‌ها */
@@ -108,39 +111,22 @@ a:hover {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.card-header {
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 8px 8px 0 0 !important;
-    padding: 1rem 1.5rem;
+/* رنگ‌های متن */
+.text-primary {
+    color: var(--primary-color) !important;
 }
 
-/* فرم‌ها */
-.form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+.text-secondary {
+    color: var(--secondary-color) !important;
 }
 
-.input-group-text {
-    background-color: var(--primary-light);
-    color: var(--primary-dark);
-    border: 1px solid var(--primary-light);
+.text-accent {
+    color: var(--accent-color) !important;
 }
 
-/* جدول‌ها */
-.table {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.table thead {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(52, 152, 219, 0.1);
+/* پس‌زمینه‌ها */
+.bg-primary-light {
+    background-color: var(--primary-light) !important;
 }
 
 /* فوتر */
@@ -151,17 +137,61 @@ footer {
     margin-top: 3rem;
 }
 
-footer a {
-    color: var(--primary-light);
+footer a.text-light {
+    transition: color 0.3s;
 }
 
-footer a:hover {
-    color: white;
+footer a.text-light:hover {
+    color: var(--secondary-light) !important;
+    text-decoration: none;
 }
 
-/* بخش قهرمان (هدر) */
+/* کلاس‌های سودمند */
+.font-bold {
+    font-weight: bold;
+}
+
+.text-xl {
+    font-size: 1.25rem;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+}
+
+.rounded-lg {
+    border-radius: 1rem;
+}
+
+/* گرید‌ها */
+.grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 768px) {
+    .md-grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .md-grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .md-grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* استایل‌های صفحه اصلی */
+
+/* بخش قهرمان */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/static/images/islamic-pattern.svg');
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('/static/images/islamic-pattern.svg');
     background-size: cover;
     background-position: center;
     color: white;
@@ -169,6 +199,8 @@ footer a:hover {
     text-align: center;
     margin-bottom: 2rem;
     border-radius: 8px;
+    border: 3px solid var(--secondary-color);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .hero-title {
@@ -182,32 +214,91 @@ footer a:hover {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* کلاس‌های کمکی */
-.font-bold {
+/* کارت ویژگی‌ها */
+.feature-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+    border: 2px solid var(--secondary-light);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+}
+
+/* بخش آمار */
+.stats-container {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    border-radius: 10px;
+    padding: 2rem;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin: 3rem 0;
+    border: 2px solid var(--secondary-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
     font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
 }
 
-.rounded-lg {
-    border-radius: 1rem;
+/* بخش نحوه کار */
+.steps-section {
+    margin: 3rem 0;
 }
 
-.text-primary {
-    color: var(--primary-color) !important;
+.step-item {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 2px solid var(--secondary-light);
+    margin: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.text-secondary {
-    color: var(--secondary-color) !important;
+.step-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 2px solid var(--secondary-color);
 }
 
-.text-accent {
-    color: var(--accent-color) !important;
+.step-item:hover .step-circle {
+    transform: scale(1.1);
+    box-shadow: 0 10px 20px rgba(0, 96, 100, 0.3);
 }
 
-.bg-primary-light {
-    background-color: var(--primary-light) !important;
-}
-
-/* لودینگ انیمیشن */
+/* لودینگ */
 .loading {
     display: inline-block;
     width: 50px;
@@ -220,96 +311,4 @@ footer a:hover {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
-
-/* صفحه منوی غذا */
-.menu-day-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.menu-meal {
-    background-color: white;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.menu-meal-title {
-    color: var(--primary-dark);
-    font-weight: bold;
-    font-size: 1.3rem;
-    border-bottom: 2px solid var(--primary-light);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.food-item {
-    padding: 0.8rem;
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
-    border-left: 4px solid var(--primary-color);
-    transition: all 0.3s ease;
-}
-
-.food-item:hover {
-    background-color: rgba(52, 152, 219, 0.1);
-    transform: translateX(-5px);
-}
-
-/* داشبورد */
-.dashboard-card {
-    height: 100%;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease;
-}
-
-.dashboard-card:hover {
-    transform: translateY(-8px);
-}
-
-.dashboard-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.stats-card {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
-    text-align: center;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.stats-number {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin: 1rem 0;
-}
-
-/* رسپانسیو */
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 2rem;
-    }
-    
-    .dashboard-card {
-        margin-bottom: 1.5rem;
-    }
-    
-    .stats-card {
-        margin-bottom: 1rem;
-    }
 }
