@@ -59,10 +59,10 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # منقضی شدن جلسه ب
 # تنظیمات Content Security Policy (CSP)
 app.config["CSP"] = {
     'default-src': "'self'",
-    'script-src': "'self' https://cdn.jsdelivr.net",
-    'style-src': "'self' https://cdn.jsdelivr.net https://cdn.replit.com",
-    'font-src': "'self' https://cdn.jsdelivr.net",
-    'img-src': "'self' data:"
+    'script-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+    'style-src': "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.replit.com",
+    'font-src': "'self' https://cdn.jsdelivr.net https://cdn.replit.com https://fonts.gstatic.com",
+    'img-src': "'self' data: https://cdn.replit.com"
 }
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
