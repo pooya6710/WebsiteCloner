@@ -1,7 +1,8 @@
 # این فایل برای رفع مشکل دور circular import بین main.py و models.py ایجاد شده است
 import os
+import time
 import logging
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from sqlalchemy.orm import DeclarativeBase
@@ -107,6 +108,65 @@ def add_security_headers(response):
     
     return response
 
+# میدلور محدودیت نرخ درخواست (Rate Limiting)
+@app.before_request
+def rate_limit():
+    if request.method == "OPTIONS":
+        # برای درخواست‌های CORS رعایت می‌کنیم
+        return None
+    
+    # دریافت آدرس IP کلاینت
+    client_ip = request.remote_addr
+    current_time = time.time()
+    path = request.path
+    
+    # بررسی اینکه مسیر حساس است یا خیر
+    sensitive_paths = ['/admin', '/api/', '/login', '/register', '/logout', '/settings', '/admin_']
+    is_sensitive_path = any(p in path for p in sensitive_paths)
+    
+    # انتخاب محدودیت مناسب بر اساس نوع مسیر
+    limit = api_rate_limit_count if is_sensitive_path else rate_limit_count
+    
+    # بررسی رکوردهای منقضی شده و پاکسازی آنها
+    for ip in list(rate_limits.keys()):
+        if current_time - rate_limits[ip]['timestamp'] > rate_limit_reset:
+            # نرخ محدودیت برای این IP ریست شده است
+            del rate_limits[ip]
+    
+    # ایجاد یا به‌روزرسانی رکورد برای IP کاربر
+    if client_ip not in rate_limits:
+        rate_limits[client_ip] = {
+            'count': 1,
+            'timestamp': current_time
+        }
+    else:
+        # اگر پنجره زمانی منقضی نشده، افزایش شمارشگر
+        if current_time - rate_limits[client_ip]['timestamp'] < rate_limit_reset:
+            rate_limits[client_ip]['count'] += 1
+        else:
+            # شروع شمارش جدید با زمان جدید
+            rate_limits[client_ip] = {
+                'count': 1,
+                'timestamp': current_time
+            }
+    
+    # بررسی رسیدن به محدودیت
+    if rate_limits[client_ip]['count'] > limit:
+        # ثبت وقوع محدودیت
+        security_logger.warning(f"RATE LIMIT EXCEEDED: IP: {client_ip}, Path: {path}, Count: {rate_limits[client_ip]['count']}")
+        
+        # ایجاد پاسخ خطا
+        remaining_time = int(rate_limit_reset - (current_time - rate_limits[client_ip]['timestamp']))
+        response = jsonify({
+            'error': 'تعداد درخواست‌های شما از حد مجاز بیشتر شده است. لطفاً بعداً تلاش کنید.',
+            'retryAfter': remaining_time
+        })
+        response.status_code = 429  # Too Many Requests
+        response.headers['Retry-After'] = str(remaining_time)
+        return response
+    
+    return None
+
 # میدلور برای ثبت درخواست‌های مشکوک و خطیر
 @app.before_request
 def log_suspicious_requests():
@@ -117,7 +177,10 @@ def log_suspicious_requests():
     suspicious_extensions = ['.php', '.asp', '.aspx', '.jsp', '.cgi', '.env', '.git', '.sql']
     
     # لیست عبارات خطرناک در URL یا پارامترها
-    dangerous_patterns = ['../..', 'SELECT ', 'UNION ', 'INSERT ', 'script', '<script', 'eval(', 'onload=', 'javascript:', 'alert(', 'document.cookie', 'exec(']
+    dangerous_patterns = [
+        '../..', 'SELECT ', 'UNION ', 'INSERT ', 'script', '<script', 'eval(', 'onload=', 'javascript:', 'alert(', 'document.cookie', 'exec(',
+        'OR 1=1', ' OR ', "'OR'", '" OR "', '--', ';--', ';', '/*', '*/', 'DROP ', 'DELETE ', 'UPDATE ', 'xp_', 'SLEEP(', 'WAITFOR DELAY'
+    ]
     
     # دریافت اطلاعات درخواست
     path = request.path
@@ -185,3 +248,12 @@ app.config["SESSION_COOKIE_SECURE"] = False  # در محیط تولید به Tru
 login_attempts = {}
 max_login_attempts = 5
 login_timeout = 900  # در ثانیه (15 دقیقه)
+
+# تنظیمات محدودیت نرخ درخواست‌ها (Rate Limiting)
+# ذخیره تعداد درخواست‌ها برای هر IP
+rate_limits = {}
+# حداکثر تعداد درخواست در پنجره زمانی مشخص
+rate_limit_count = 100  # تعداد درخواست مجاز در پنجره زمانی
+rate_limit_reset = 60  # در ثانیه (1 دقیقه)
+# محدودیت شدیدتر برای مسیرهای حساس
+api_rate_limit_count = 30  # تعداد درخواست مجاز برای مسیرهای حساس در پنجره زمانی
