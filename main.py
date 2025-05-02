@@ -27,9 +27,42 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def index():
-    # افزودن متغیر now برای فوتر تا سال جاری را نمایش دهد
+    # آمار واقعی برای صفحه اصلی
     now = datetime.datetime.now()
-    return render_template('index.html', now=now)
+    
+    # تعداد کل دانشجویان
+    student_count = Student.query.count()
+    
+    # تعداد کل رزروها
+    reservation_count = Reservation.query.count()
+    
+    # تعداد رزروهای تحویل شده
+    delivered_count = Reservation.query.filter_by(delivered=1).count()
+    
+    # تعداد روزهای منو
+    menu_days_count = Menu.query.count()
+    
+    # آمار وعده‌های غذایی
+    breakfast_count = Reservation.query.filter_by(meal='breakfast').count()
+    lunch_count = Reservation.query.filter_by(meal='lunch').count()
+    dinner_count = Reservation.query.filter_by(meal='dinner').count()
+    
+    # آمار غذاهای محبوب
+    popular_foods = db.session.query(
+        Reservation.food_name, 
+        db.func.count(Reservation.id).label('count')
+    ).group_by(Reservation.food_name).order_by(db.func.count(Reservation.id).desc()).limit(3).all()
+    
+    return render_template('index.html', 
+                           now=now,
+                           student_count=student_count,
+                           reservation_count=reservation_count,
+                           delivered_count=delivered_count,
+                           menu_days_count=menu_days_count,
+                           breakfast_count=breakfast_count,
+                           lunch_count=lunch_count,
+                           dinner_count=dinner_count,
+                           popular_foods=popular_foods)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

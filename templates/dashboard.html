@@ -81,10 +81,23 @@
                         
                         <hr>
                         
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-wallet2 fs-1 me-3 text-success"></i>
+                            <div>
+                                <h5 class="mb-0">اعتبار حساب:</h5>
+                                <p class="fs-4 mb-0">{{ student.credit|default(0)|int }} تومان</p>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
                         <div class="d-grid gap-2">
                             <a href="{{ url_for('menu') }}" class="btn btn-primary mb-2">
                                 <i class="bi bi-calendar-plus"></i> رزرو غذای جدید
                             </a>
+                            <button type="button" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#chargeModal">
+                                <i class="bi bi-cash-coin"></i> افزایش اعتبار
+                            </button>
                             <a href="{{ url_for('settings') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-gear"></i> تنظیمات حساب کاربری
                             </a>
@@ -210,7 +223,50 @@
         </div>
     </div>
 
+    <!-- مدال افزایش اعتبار -->
+    <div class="modal fade" id="chargeModal" tabindex="-1" aria-labelledby="chargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="chargeModalLabel">افزایش اعتبار حساب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('charge_account') }}" method="POST" id="chargeForm">
+                        <div class="mb-3">
+                            <label for="chargeAmount" class="form-label">مبلغ مورد نظر به تومان (حداقل 1000 تومان)</label>
+                            <input type="number" class="form-control" id="chargeAmount" name="amount" min="1000" step="1000" value="10000" required>
+                            <div class="form-text">
+                                مبلغ فوق از طریق درگاه پرداخت زرین‌پال پرداخت خواهد شد.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-credit-card"></i> پرداخت آنلاین
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- جاوااسکریپت بوت‌استرپ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // اعتبارسنجی فرم افزایش اعتبار
+        document.getElementById('chargeForm').addEventListener('submit', function(event) {
+            const amount = parseInt(document.getElementById('chargeAmount').value);
+            if (amount < 1000) {
+                event.preventDefault();
+                alert('مبلغ شارژ باید حداقل 1000 تومان باشد.');
+            }
+        });
+    </script>
 </body>
 </html>

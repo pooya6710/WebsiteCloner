@@ -153,18 +153,56 @@
 <div class="stats-container">
     <div class="grid grid-cols-1 md-grid-cols-3">
         <div class="stat-item">
-            <div class="stat-number">+<span id="student-count">500</span></div>
+            <div class="stat-number">+<span id="student-count">{{ student_count }}</span></div>
             <p>دانشجوی فعال</p>
         </div>
         <div class="stat-item">
-            <div class="stat-number">+<span id="meal-count">1000</span></div>
+            <div class="stat-number">+<span id="meal-count">{{ delivered_count }}</span></div>
             <p>وعده غذایی سرو شده</p>
         </div>
         <div class="stat-item">
-            <div class="stat-number">+<span id="food-count">50</span></div>
-            <p>نوع غذای مختلف</p>
+            <div class="stat-number">+<span id="reservation-count">{{ reservation_count }}</span></div>
+            <p>رزرو غذا تاکنون</p>
         </div>
     </div>
+    
+    <!-- بخش آمار وعده‌های غذایی -->
+    <div class="mt-4 pt-4 border-top border-light">
+        <h4 class="text-center mb-3">آمار وعده‌های غذایی</h4>
+        <div class="grid grid-cols-1 md-grid-cols-3">
+            <div class="stat-item">
+                <div class="stat-number"><span id="breakfast-count">{{ breakfast_count }}</span></div>
+                <p>صبحانه</p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><span id="lunch-count">{{ lunch_count }}</span></div>
+                <p>ناهار</p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><span id="dinner-count">{{ dinner_count }}</span></div>
+                <p>شام</p>
+            </div>
+        </div>
+    </div>
+    
+    {% if popular_foods and popular_foods|length > 0 %}
+    <!-- بخش غذاهای محبوب -->
+    <div class="mt-4 pt-4 border-top border-light">
+        <h4 class="text-center mb-3">غذاهای محبوب</h4>
+        <div class="row">
+            {% for food in popular_foods %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 bg-dark text-white border-0">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ food.name }}</h5>
+                        <p class="card-text">تعداد رزرو: {{ food.count }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- بخش نحوه کار -->
@@ -212,6 +250,11 @@
 <script>
     function animateCount(elementId, finalCount, duration = 2000) {
         const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        // خواندن مقدار نهایی از متن عنصر
+        finalCount = parseInt(element.textContent) || 0;
+        
         let startTime = null;
         const startCount = 0;
         
@@ -233,22 +276,30 @@
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                if (entry.target.id === 'student-count') {
-                    animateCount('student-count', 500);
-                } else if (entry.target.id === 'meal-count') {
-                    animateCount('meal-count', 1000);
-                } else if (entry.target.id === 'food-count') {
-                    animateCount('food-count', 50);
-                }
+                // اجرای انیمیشن برای عنصر مورد نظر
+                animateCount(entry.target.id);
                 observer.unobserve(entry.target);
             }
         });
     }, { threshold: 0.1 });
     
     document.addEventListener('DOMContentLoaded', function() {
-        observer.observe(document.getElementById('student-count'));
-        observer.observe(document.getElementById('meal-count'));
-        observer.observe(document.getElementById('food-count'));
+        // اضافه کردن تمام شمارنده‌ها به ابزرور
+        const counters = [
+            'student-count',
+            'reservation-count',
+            'meal-count',
+            'breakfast-count',
+            'lunch-count',
+            'dinner-count'
+        ];
+        
+        counters.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                observer.observe(element);
+            }
+        });
     });
 </script>
 {% endblock %}
