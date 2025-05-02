@@ -29,7 +29,7 @@ def load_user(user_id):
 def index():
     # افزودن متغیر now برای فوتر تا سال جاری را نمایش دهد
     now = datetime.datetime.now()
-    return render_template('index.html', now=now)
+    return render_template('new_index.html', now=now)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
