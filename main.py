@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+from collections import OrderedDict
 from flask import request, jsonify, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -212,15 +213,16 @@ def dashboard():
 def menu():
     # دریافت منوی هفتگی
     weekly_menu = Menu.query.all()
-    days = {
-        "saturday": "شنبه",
-        "sunday": "یکشنبه",
-        "monday": "دوشنبه",
-        "tuesday": "سه‌شنبه",
-        "wednesday": "چهارشنبه",
-        "thursday": "پنج‌شنبه",
-        "friday": "جمعه"
-    }
+    # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
+    days = OrderedDict([
+        ("saturday", "شنبه"),
+        ("sunday", "یکشنبه"),
+        ("monday", "دوشنبه"),
+        ("tuesday", "سه‌شنبه"),
+        ("wednesday", "چهارشنبه"),
+        ("thursday", "پنج‌شنبه"),
+        ("friday", "جمعه")
+    ])
     meals = {
         "breakfast": "صبحانه",
         "lunch": "ناهار",
@@ -412,15 +414,16 @@ def admin_menu():
         return redirect(url_for('dashboard'))
     
     weekly_menu = Menu.query.all()
-    days = {
-        "saturday": "شنبه",
-        "sunday": "یکشنبه",
-        "monday": "دوشنبه",
-        "tuesday": "سه‌شنبه",
-        "wednesday": "چهارشنبه",
-        "thursday": "پنج‌شنبه",
-        "friday": "جمعه"
-    }
+    # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
+    days = OrderedDict([
+        ("saturday", "شنبه"),
+        ("sunday", "یکشنبه"),
+        ("monday", "دوشنبه"),
+        ("tuesday", "سه‌شنبه"),
+        ("wednesday", "چهارشنبه"),
+        ("thursday", "پنج‌شنبه"),
+        ("friday", "جمعه")
+    ])
     meals = {
         "breakfast": "صبحانه",
         "lunch": "ناهار",
@@ -616,15 +619,16 @@ def cancel_all_day():
     
     if not reservations:
         # انتخاب نام فارسی روز
-        days = {
-            "saturday": "شنبه",
-            "sunday": "یکشنبه",
-            "monday": "دوشنبه",
-            "tuesday": "سه‌شنبه",
-            "wednesday": "چهارشنبه",
-            "thursday": "پنج‌شنبه",
-            "friday": "جمعه"
-        }
+        # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
+        days = OrderedDict([
+            ("saturday", "شنبه"),
+            ("sunday", "یکشنبه"),
+            ("monday", "دوشنبه"),
+            ("tuesday", "سه‌شنبه"),
+            ("wednesday", "چهارشنبه"),
+            ("thursday", "پنج‌شنبه"),
+            ("friday", "جمعه")
+        ])
         flash(f'شما رزرو قابل لغوی برای روز {days.get(day, day)} ندارید', 'warning')
         return redirect(url_for('dashboard'))
     
