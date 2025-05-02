@@ -563,6 +563,43 @@ def admin_reports():
         "friday": "جمعه"
     }
     
+    # مرتب‌سازی ترتیب روزهای هفته
+    day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
+    
+    # آمار ترکیبی روز و وعده‌های غذایی
+    day_meal_stats = db.session.query(
+        Reservation.day,
+        Reservation.meal,
+        db.func.count(Reservation.id).label('count')
+    ).group_by(Reservation.day, Reservation.meal).all()
+    
+    # ساختار داده برای آمار روزانه به تفکیک وعده
+    daily_meal_stats = {}
+    for day_name in days.keys():
+        daily_meal_stats[day_name] = {
+            'day_name': days[day_name],
+            'breakfast': 0,
+            'lunch': 0,
+            'dinner': 0,
+            'total': 0
+        }
+    
+    # پر کردن آمار روزانه به تفکیک وعده
+    for day, meal, count in day_meal_stats:
+        if day in daily_meal_stats:
+            daily_meal_stats[day][meal] = count
+            daily_meal_stats[day]['total'] += count
+    
+    # تبدیل دیکشنری به لیست برای استفاده در تمپلیت
+    daily_stats_detail = []
+    for day, stats in daily_meal_stats.items():
+        daily_stats_detail.append(stats)
+    
+    # مرتب‌سازی بر اساس ترتیب روزهای هفته
+    day_name_to_key = {value: key for key, value in days.items()}
+    daily_stats_detail.sort(key=lambda x: day_order.get(day_name_to_key.get(x['day_name'], ''), 7))
+    
+    # آمار کلی روزهای هفته برای نمودار اصلی
     day_stats = db.session.query(
         Reservation.day, 
         db.func.count(Reservation.id).label('count')
@@ -577,8 +614,8 @@ def admin_reports():
             'count': count,
             'percentage': percentage
         })
+    
     # مرتب‌سازی بر اساس ترتیب روزهای هفته
-    day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
     daily_stats.sort(key=lambda x: day_order.get(x['day'], 7))
     
     # آمار وعده‌های غذایی
@@ -599,6 +636,7 @@ def admin_reports():
     return render_template('admin_reports.html', 
                            popular_foods=popular_foods,
                            daily_stats=daily_stats,
+                           daily_stats_detail=daily_stats_detail,
                            meal_stats=meal_stats)
 
 if __name__ == '__main__':
