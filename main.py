@@ -72,7 +72,7 @@ def register():
             return render_template('register.html')
         
         # ایجاد کاربر جدید - از کد تغذیه به عنوان نام کاربری استفاده می‌کنیم
-        new_user = User(username=feeding_code, email=f"{feeding_code}@example.com", password_hash=generate_password_hash(password))
+        new_user = User(username=feeding_code, password=generate_password_hash(password))
         db.session.add(new_user)
         db.session.flush()  # برای دریافت ID کاربر
         
@@ -305,12 +305,12 @@ def settings():
         
         # بررسی رمز عبور فعلی
         user = User.query.get(current_user.id)
-        if not check_password_hash(user.password_hash, current_password):
+        if not check_password_hash(user.password, current_password):
             flash('رمز عبور فعلی نادرست است', 'danger')
             return redirect(url_for('settings'))
         
         # به‌روزرسانی رمز عبور
-        user.password_hash = generate_password_hash(new_password)
+        user.password = generate_password_hash(new_password)
         db.session.commit()
         
         flash('رمز عبور شما با موفقیت تغییر یافت', 'success')
