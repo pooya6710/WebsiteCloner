@@ -12,6 +12,8 @@
     --light-color: #f8f9fa;
     --dark-color: #343a40;
     --border-color: #dee2e6;
+    --transparent-white: rgba(255, 255, 255, 0.92);
+    --transparent-dark: rgba(0, 0, 0, 0.7);
 }
 
 body {
@@ -27,12 +29,13 @@ body {
 }
 
 .container {
-    background-color: rgba(255, 255, 255, 0.92);
+    background-color: var(--transparent-white);
     border-radius: 10px;
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 a {
@@ -78,24 +81,34 @@ a:hover {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
     color: white;
+    border: 2px solid var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
     color: white;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
     color: var(--dark-color);
+    border: 2px solid var(--primary-dark);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
     background-color: var(--secondary-dark);
     border-color: var(--secondary-dark);
     color: var(--dark-color);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 /* کارت‌ها */
@@ -122,6 +135,10 @@ a:hover {
 
 .text-accent {
     color: var(--accent-color) !important;
+}
+
+.text-light {
+    color: var(--light-color) !important;
 }
 
 /* پس‌زمینه‌ها */
@@ -191,7 +208,7 @@ footer a.text-light:hover {
 
 /* بخش قهرمان */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('../images/islamic-pattern.svg');
+    background: linear-gradient(var(--transparent-dark), rgba(0, 0, 0, 0.8)), url('../images/islamic-pattern.svg');
     background-size: cover;
     background-position: center;
     color: white;
@@ -200,7 +217,7 @@ footer a.text-light:hover {
     margin-bottom: 2rem;
     border-radius: 8px;
     border: 3px solid var(--secondary-color);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .hero-title {
@@ -216,14 +233,15 @@ footer a.text-light:hover {
 
 /* کارت ویژگی‌ها */
 .feature-card {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--transparent-white);
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     padding: 2rem;
     text-align: center;
     transition: transform 0.3s, box-shadow 0.3s;
     height: 100%;
     border: 2px solid var(--secondary-light);
+    color: var(--text-color);
 }
 
 .feature-card:hover {
@@ -270,11 +288,12 @@ footer a.text-light:hover {
     text-align: center;
     margin-bottom: 2rem;
     padding: 15px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--transparent-white);
     border-radius: 10px;
     border: 2px solid var(--secondary-light);
     margin: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
 }
 
 .step-circle {
