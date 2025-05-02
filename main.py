@@ -1,14 +1,19 @@
 import datetime
+import os
 from flask import request, jsonify, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import app, db, login_manager, logger
+from zarinpal import ZarinPal
+
+# درگاه پرداخت زرین‌پال
+zarinpal_gateway = ZarinPal(sandbox=True)  # استفاده از محیط تست
 
 # Create all database tables
 with app.app_context():
     # Import models to register them with SQLAlchemy
-    from models import Student, Reservation, Menu, DatabaseBackup, User
+    from models import Student, Reservation, Menu, DatabaseBackup, User, Payment
     db.create_all()
     
     # بارگذاری منوی پیش‌فرض (اگر وجود نداشته باشد)
