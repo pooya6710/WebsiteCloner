@@ -29,7 +29,7 @@ def load_user(user_id):
 def index():
     # افزودن متغیر now برای فوتر تا سال جاری را نمایش دهد
     now = datetime.datetime.now()
-    return render_template('new_index.html', now=now)
+    return render_template('index.html', now=now)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -45,7 +45,7 @@ def login():
         else:
             flash('کد تغذیه یا رمز عبور اشتباه است', 'danger')
     
-    return render_template('new_login.html')
+    return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -57,19 +57,19 @@ def register():
         # بررسی تطابق رمز عبور
         if password != confirm_password:
             flash('رمز عبور و تکرار آن مطابقت ندارند', 'danger')
-            return render_template('new_register.html')
+            return render_template('register.html')
         
         # بررسی اینکه کد تغذیه قبلاً ثبت نشده باشد
         existing_student = Student.query.filter_by(feeding_code=feeding_code).first()
         if existing_student:
             flash('این کد تغذیه قبلاً ثبت شده است', 'danger')
-            return render_template('new_register.html')
+            return render_template('register.html')
         
         # بررسی اینکه کاربری با این نام کاربری قبلاً ثبت نشده باشد
         existing_user = User.query.filter_by(username=feeding_code).first()
         if existing_user:
             flash('کاربری با این کد تغذیه قبلاً ثبت شده است', 'danger')
-            return render_template('new_register.html')
+            return render_template('register.html')
         
         # ایجاد کاربر جدید - از کد تغذیه به عنوان نام کاربری استفاده می‌کنیم
         new_user = User(username=feeding_code, password=generate_password_hash(password))
@@ -84,7 +84,7 @@ def register():
         flash('ثبت نام شما با موفقیت انجام شد. اکنون می‌توانید وارد سیستم شوید', 'success')
         return redirect(url_for('login'))
     
-    return render_template('new_register.html')
+    return render_template('register.html')
 
 @app.route('/logout')
 @login_required
