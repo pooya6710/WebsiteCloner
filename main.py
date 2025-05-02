@@ -442,35 +442,53 @@ def admin_update_menu():
     food_items = [item.strip() for item in food_items_text.split('\n') if item.strip()]
     
     try:
+        # برای دیباگ، اطلاعات ارسالی را لاگ می‌کنیم
+        print(f"Updating menu - Day: {day}, Meal: {meal}, Food items: {food_items}")
+        
         # دریافت منوی روز مورد نظر
         day_menu = Menu.query.filter_by(day=day).first()
         if not day_menu:
-            flash(f'منوی روز {day} یافت نشد', 'danger')
-            return redirect(url_for('admin_menu'))
+            flash(f'منوی روز {day} یافت نشد - در حال ایجاد منوی جدید', 'warning')
+            # ایجاد یک منوی جدید برای این روز
+            day_menu = Menu(day=day, meal_data={})
+            db.session.add(day_menu)
         
-        # بررسی وجود meal_data
-        if day_menu.meal_data is None:
-            day_menu.meal_data = {}
+        # تضمین اینکه meal_data یک دیکشنری است
+        current_data = {}
+        if day_menu.meal_data:
+            if isinstance(day_menu.meal_data, dict):
+                current_data = day_menu.meal_data
+            elif isinstance(day_menu.meal_data, str):
+                import json
+                try:
+                    current_data = json.loads(day_menu.meal_data)
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error: {str(e)}")
+                    current_data = {}
         
-        # اگر meal_data رشته است، آن را به دیکشنری تبدیل کنید
-        if isinstance(day_menu.meal_data, str):
-            import json
-            try:
-                day_menu.meal_data = json.loads(day_menu.meal_data)
-            except:
-                day_menu.meal_data = {}
+        # وعده‌های غذایی پیش‌فرض را اضافه می‌کنیم اگر وجود نداشته باشند
+        for meal_name in ['breakfast', 'lunch', 'dinner']:
+            if meal_name not in current_data:
+                current_data[meal_name] = []
         
-        # به‌روزرسانی منو
-        meal_data = dict(day_menu.meal_data)  # کپی می‌کنیم تا اطمینان یابیم دیکشنری است
-        meal_data[meal] = food_items
-        day_menu.meal_data = meal_data
+        # به‌روزرسانی منو برای وعده مورد نظر
+        current_data[meal] = food_items
+        day_menu.meal_data = current_data
         
+        # کامیت کردن تغییرات به دیتابیس
         db.session.commit()
+        
+        # برای دیباگ، منوی به‌روزرسانی شده را لاگ می‌کنیم
+        print(f"Updated menu data: {day_menu.meal_data}")
+        
         flash(f'منوی {meal} روز {day} با موفقیت به‌روزرسانی شد', 'success')
     except Exception as e:
         db.session.rollback()
+        # لاگ خطا با جزئیات بیشتر
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error updating menu: {str(e)}\n{error_details}")
         flash(f'خطا در به‌روزرسانی منو: {str(e)}', 'danger')
-        print(f'Error updating menu: {str(e)}')
     
     return redirect(url_for('admin_menu'))
 
