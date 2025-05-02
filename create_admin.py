@@ -25,9 +25,7 @@ def create_admin_user():
             # ایجاد کاربر مدیر جدید
             new_admin = User(
                 username='admin',
-                email='admin@example.com',
-                password_hash=generate_password_hash('admin123'),
-                is_admin=True
+                password=generate_password_hash('admin123')
             )
             db.session.add(new_admin)
             db.session.commit()
