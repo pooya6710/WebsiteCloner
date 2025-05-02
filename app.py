@@ -1,7 +1,7 @@
 # این فایل برای رفع مشکل دور circular import بین main.py و models.py ایجاد شده است
 import os
 import logging
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from sqlalchemy.orm import DeclarativeBase
@@ -11,6 +11,24 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                    level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# تنظیم لاگر برای رویدادهای امنیتی
+security_logger = logging.getLogger('security')
+security_logger.setLevel(logging.INFO)
+
+# اضافه کردن handler برای نوشتن لاگ‌های امنیتی در فایل جداگانه
+try:
+    # ایجاد دایرکتوری logs اگر وجود نداشته باشد
+    os.makedirs('logs', exist_ok=True)
+    
+    # تنظیم handler فایل برای لاگ‌های امنیتی
+    security_handler = logging.FileHandler('logs/security.log')
+    security_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    security_logger.addHandler(security_handler)
+except Exception as e:
+    logger.error(f"خطا در راه‌اندازی لاگر امنیتی: {e}")
+    # اگر نتوانستیم فایل لاگ را بسازیم، از لاگر اصلی استفاده می‌کنیم
+    security_logger = logger
 
 # Create base class for SQLAlchemy models
 class Base(DeclarativeBase):
@@ -88,6 +106,74 @@ def add_security_headers(response):
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     
     return response
+
+# میدلور برای ثبت درخواست‌های مشکوک و خطیر
+@app.before_request
+def log_suspicious_requests():
+    # لیست مسیرهای حساس که باید همیشه ثبت شوند
+    sensitive_paths = ['/admin', '/api/', '/logout', '/settings', '/admin_']
+    
+    # لیست پسوندهای مشکوک که ممکن است نشاندهنده حمله باشند
+    suspicious_extensions = ['.php', '.asp', '.aspx', '.jsp', '.cgi', '.env', '.git', '.sql']
+    
+    # لیست عبارات خطرناک در URL یا پارامترها
+    dangerous_patterns = ['../..', 'SELECT ', 'UNION ', 'INSERT ', 'script', '<script', 'eval(', 'onload=', 'javascript:', 'alert(', 'document.cookie', 'exec(']
+    
+    # دریافت اطلاعات درخواست
+    path = request.path
+    method = request.method
+    client_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    referrer = request.referrer or 'None'
+    request_data = {}
+    
+    # بررسی قرار گرفتن در مسیرهای حساس
+    is_sensitive = any(sensitive_path in path for sensitive_path in sensitive_paths)
+    
+    # بررسی پسوندهای مشکوک
+    has_suspicious_ext = any(path.endswith(ext) for ext in suspicious_extensions)
+    
+    # بررسی الگوهای خطرناک در URL
+    has_dangerous_pattern = any(pattern in path.lower() for pattern in dangerous_patterns)
+    
+    # بررسی پارامترهای GET
+    if request.args:
+        request_data['query_params'] = dict(request.args)
+        # بررسی الگوهای خطرناک در پارامترهای GET
+        has_dangerous_query = any(
+            any(pattern in str(v).lower() for pattern in dangerous_patterns)
+            for v in request.args.values()
+        )
+    else:
+        has_dangerous_query = False
+    
+    # بررسی روش‌های POST, PUT, DELETE و سایر روش‌های غیر GET
+    is_non_get = method != 'GET'
+    
+    # ثبت درخواست‌های مشکوک یا حساس
+    if is_sensitive or has_suspicious_ext or has_dangerous_pattern or has_dangerous_query:
+        # تعیین سطح لاگ
+        if has_dangerous_pattern or has_suspicious_ext or has_dangerous_query:
+            log_level = 'warning'
+            message = f"SUSPICIOUS REQUEST: {method} {path}"
+        else:
+            log_level = 'info'
+            message = f"SENSITIVE REQUEST: {method} {path}"
+        
+        # اضافه کردن اطلاعات بیشتر
+        message += f" | IP: {client_ip} | Referrer: {referrer} | User-Agent: {user_agent}"
+        
+        # ثبت لاگ بر اساس سطح
+        if log_level == 'warning':
+            security_logger.warning(message)
+        else:
+            security_logger.info(message)
+    
+    # لاگ رویدادهای POST, PUT, DELETE برای تغییرات در سیستم
+    elif is_non_get:
+        security_logger.info(f"MODIFY REQUEST: {method} {path} | IP: {client_ip}")
+    
+    return None  # اجازه ادامه فرآیند درخواست
 
 # تنظیمات کوکی‌های جلسه
 # در حالت توسعه (development) تنظیمات امنیتی را به صورت موقت غیرفعال می‌کنیم

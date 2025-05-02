@@ -5,7 +5,7 @@ from flask import request, jsonify, render_template, redirect, url_for, flash, s
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import app, db, login_manager, logger, login_attempts, max_login_attempts, login_timeout
+from app import app, db, login_manager, logger, security_logger, login_attempts, max_login_attempts, login_timeout
 from zarinpal import ZarinPal
 
 # درگاه پرداخت زرین‌پال
@@ -73,11 +73,16 @@ def login():
         
         # بررسی قفل حساب کاربری
         client_ip = request.remote_addr
+        user_agent = request.headers.get('User-Agent', 'Unknown')
         current_time = time.time()
+        
+        # لاگ تلاش ورود
+        security_logger.info(f"Login attempt from IP: {client_ip}, Feeding Code: {feeding_code}, User-Agent: {user_agent}")
         
         # پاک کردن رکوردهای منقضی شده تلاش‌های ناموفق
         for ip in list(login_attempts.keys()):
             if current_time - login_attempts[ip]['timestamp'] > login_timeout:
+                security_logger.info(f"Removing expired login attempts record for IP: {ip}")
                 del login_attempts[ip]
         
         # بررسی وضعیت قفل حساب برای آدرس IP فعلی
@@ -86,10 +91,12 @@ def login():
             time_passed = current_time - login_attempts[client_ip]['timestamp']
             if time_passed < login_timeout:
                 remaining_time = int((login_timeout - time_passed) / 60)
+                security_logger.warning(f"Blocked login attempt from IP: {client_ip} - Account is locked. Attempts: {login_attempts[client_ip]['attempts']}")
                 flash(f'حساب کاربری شما به دلیل تلاش‌های ناموفق قفل شده است. لطفاً {remaining_time} دقیقه دیگر امتحان کنید.', 'danger')
                 return render_template('login.html')
             else:
                 # زمان قفل به پایان رسیده است
+                security_logger.info(f"Unlocking account for IP: {client_ip} - Lock timeout expired")
                 del login_attempts[client_ip]
         
         user = User.query.filter_by(username=feeding_code).first()
@@ -98,6 +105,9 @@ def login():
             # ورود موفق - پاک کردن سابقه تلاش‌های ناموفق
             if client_ip in login_attempts:
                 del login_attempts[client_ip]
+                
+            # ثبت ورود موفق در لاگ
+            security_logger.info(f"Successful login for Feeding Code: {feeding_code} from IP: {client_ip}")
             
             login_user(user)
             flash('با موفقیت وارد شدید', 'success')
@@ -106,15 +116,18 @@ def login():
             # ورود ناموفق - افزایش شمارنده تلاش‌های ناموفق
             if client_ip not in login_attempts:
                 login_attempts[client_ip] = {'attempts': 1, 'timestamp': current_time}
+                security_logger.warning(f"Failed login attempt for Feeding Code: {feeding_code} from IP: {client_ip} (Attempt 1/{max_login_attempts})")
             else:
                 login_attempts[client_ip]['attempts'] += 1
                 login_attempts[client_ip]['timestamp'] = current_time
+                security_logger.warning(f"Failed login attempt for Feeding Code: {feeding_code} from IP: {client_ip} (Attempt {login_attempts[client_ip]['attempts']}/{max_login_attempts})")
             
             # اعلان تعداد تلاش‌های باقی‌مانده
             remaining_attempts = max_login_attempts - login_attempts[client_ip]['attempts']
             if remaining_attempts > 0:
                 flash(f'کد تغذیه یا رمز عبور اشتباه است. {remaining_attempts} تلاش دیگر باقی مانده است.', 'danger')
             else:
+                security_logger.warning(f"Account locked for IP: {client_ip} due to too many failed login attempts ({max_login_attempts})")
                 flash(f'حساب کاربری شما به مدت {int(login_timeout/60)} دقیقه قفل شده است.', 'danger')
     
     return render_template('login.html')
@@ -153,6 +166,11 @@ def register():
         db.session.add(new_student)
         db.session.commit()
         
+        # ثبت لاگ ایجاد حساب جدید
+        client_ip = request.remote_addr
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        security_logger.info(f"New user registered: User ID: {new_user.id}, Feeding Code: {feeding_code}, IP: {client_ip}, User-Agent: {user_agent}")
+        
         flash('ثبت نام شما با موفقیت انجام شد. اکنون می‌توانید وارد سیستم شوید', 'success')
         return redirect(url_for('login'))
     
@@ -161,6 +179,16 @@ def register():
 @app.route('/logout')
 @login_required
 def logout():
+    # ثبت لاگ خروج از سیستم
+    client_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    try:
+        user_id = current_user.id
+        username = current_user.username
+        security_logger.info(f"User logged out: User ID: {user_id}, Username: {username}, IP: {client_ip}, User-Agent: {user_agent}")
+    except Exception as e:
+        security_logger.warning(f"Error logging logout: {str(e)}")
+    
     logout_user()
     flash('با موفقیت خارج شدید', 'success')
     return redirect(url_for('index'))
