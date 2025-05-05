@@ -223,8 +223,18 @@ def dashboard():
     
     # تبدیل تاریخ‌ها به شمسی
     jalali_dates = {}
+    
+    # محاسبه میزان بدهی دانشجو
+    student_debt = 0
     for reservation in reservations:
         jalali_dates[reservation.id] = gregorian_to_jalali_datetime(reservation.timestamp).strftime('%Y/%m/%d %H:%M:%S')
+        # اضافه کردن قیمت غذا به بدهی دانشجو
+        student_debt += reservation.food_price
+    
+    # در اینجا می‌توانیم بدهی را به صورت دستی در جدول دانشجویان هم به‌روزرسانی کنیم
+    # این کار برای گزارش‌گیری‌های بعدی مفید است
+    student.credit = -student_debt  # بدهی به صورت منفی ذخیره می‌شود
+    db.session.commit()
     
     # تاریخ فعلی به شمسی
     now_jalali = gregorian_to_jalali_datetime(datetime.datetime.now()).strftime('%Y/%m/%d')

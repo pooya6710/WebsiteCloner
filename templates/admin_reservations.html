@@ -62,22 +62,59 @@
 
     <!-- محتوای اصلی -->
     <div class="container mt-4">
-        <div class="row">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">جستجوی کد تغذیه</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('admin_reservations') }}" method="GET" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="feeding_code" placeholder="کد تغذیه دانشجو را وارد کنید" value="{{ request.args.get('feeding_code', '') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i> جستجو
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ url_for('admin_reservations') }}" class="btn btn-secondary w-100">
+                                    <i class="bi bi-x-lg"></i> پاک کردن
+                                </a>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% set days = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'] %}
+        {% set day_mapping = { 'saturday': 'شنبه', 'sunday': 'یکشنبه', 'monday': 'دوشنبه', 'tuesday': 'سه‌شنبه', 'wednesday': 'چهارشنبه', 'thursday': 'پنج‌شنبه', 'friday': 'جمعه' } %}
+        {% set meal_mapping = { 'breakfast': 'صبحانه', 'lunch': 'ناهار', 'dinner': 'شام' } %}
+        
+        {% for day in days %}
+        <div class="row mb-4">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">مدیریت رزروها</h3>
-                        <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                        <h3 class="mb-0">رزروهای روز {{ day_mapping[day] }}</h3>
+                        <!-- نمایش تعداد رزروهای این روز -->
+                        {% set day_reservations = reservations|selectattr('day', 'equalto', day)|list %}
+                        <span class="badge bg-light text-dark">{{ day_reservations|length }} رزرو</span>
                     </div>
                     <div class="card-body">
-                        {% if reservations %}
+                        {% set day_reservations = reservations|selectattr('day', 'equalto', day)|list %}
+                        {% if day_reservations %}
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
                                         <th>شناسه</th>
                                         <th>کد تغذیه</th>
-                                        <th>روز</th>
                                         <th>وعده</th>
                                         <th>غذا</th>
                                         <th>قیمت (تومان)</th>
@@ -87,16 +124,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for reservation in reservations %}
+                                    {% for reservation in day_reservations %}
                                     <tr>
                                         <td>{{ reservation.id }}</td>
                                         <td>{{ reservation.student.feeding_code }}</td>
                                         <td>
-                                            {% set day_mapping = { 'saturday': 'شنبه', 'sunday': 'یکشنبه', 'monday': 'دوشنبه', 'tuesday': 'سه‌شنبه', 'wednesday': 'چهارشنبه', 'thursday': 'پنج‌شنبه', 'friday': 'جمعه' } %}
-                                            {{ day_mapping[reservation.day] }}
-                                        </td>
-                                        <td>
-                                            {% set meal_mapping = { 'breakfast': 'صبحانه', 'lunch': 'ناهار', 'dinner': 'شام' } %}
                                             {{ meal_mapping[reservation.meal] }}
                                         </td>
                                         <td>{{ reservation.food_name }}</td>
@@ -123,6 +155,88 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> هیچ رزروی غذایی برای روز {{ day_mapping[day] }} ثبت نشده است.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- کارت خلاصه آماری -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">آمار مالی</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">تعداد کل رزروها</h5>
+                                        <p class="display-4">{{ reservations|length }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">مجموع مبالغ رزروها</h5>
+                                        {% set total_price = 0 %}
+                                        {% for reservation in reservations %}
+                                            {% set total_price = total_price + reservation.food_price %}
+                                        {% endfor %}
+                                        <p class="display-4">{{ "{:,.0f}".format(total_price) }} <small>تومان</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body">
+                                        <h5 class="card-title">رزروهای در انتظار</h5>
+                                        {% set pending_count = 0 %}
+                                        {% for reservation in reservations %}
+                                            {% if reservation.delivered == 0 %}
+                                                {% set pending_count = pending_count + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <p class="display-4">{{ pending_count }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">رزروهای تحویل شده</h5>
+                                        {% set delivered_count = 0 %}
+                                        {% for reservation in reservations %}
+                                            {% if reservation.delivered == 1 %}
+                                                {% set delivered_count = delivered_count + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <p class="display-4">{{ delivered_count }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if not reservations %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> هیچ رزروی غذایی در سیستم ثبت نشده است.
+        </div>
+        {% endif %}
                         {% else %}
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> هیچ رزروی غذایی در سیستم ثبت نشده است.
