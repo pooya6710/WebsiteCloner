@@ -212,6 +212,9 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # به‌روزرسانی آمار مالی و بدهی‌ها
+    update_financial_statistics()
+    
     # دریافت اطلاعات دانشجو
     student = Student.query.filter_by(user_id=str(current_user.id)).first()
     if not student:
@@ -224,17 +227,8 @@ def dashboard():
     # تبدیل تاریخ‌ها به شمسی
     jalali_dates = {}
     
-    # محاسبه میزان بدهی دانشجو
-    student_debt = 0
     for reservation in reservations:
         jalali_dates[reservation.id] = gregorian_to_jalali_datetime(reservation.timestamp).strftime('%Y/%m/%d %H:%M:%S')
-        # اضافه کردن قیمت غذا به بدهی دانشجو
-        student_debt += reservation.food_price
-    
-    # در اینجا می‌توانیم بدهی را به صورت دستی در جدول دانشجویان هم به‌روزرسانی کنیم
-    # این کار برای گزارش‌گیری‌های بعدی مفید است
-    student.credit = -student_debt  # بدهی به صورت منفی ذخیره می‌شود
-    db.session.commit()
     
     # تاریخ فعلی به شمسی
     now_jalali = gregorian_to_jalali_datetime(datetime.datetime.now()).strftime('%Y/%m/%d')
@@ -448,6 +442,9 @@ def admin():
         flash('شما دسترسی به پنل مدیریت را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
+    # به‌روزرسانی بدهی همه دانشجویان و آمار مالی قبل از نمایش داشبورد مدیریت
+    update_financial_statistics()
+    
     # دریافت آمار برای پنل مدیریت
     student_count = Student.query.count()
     reservation_count = Reservation.query.count()
@@ -475,21 +472,8 @@ def admin_students():
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
-    # به‌روزرسانی بدهی همه دانشجویان قبل از نمایش لیست
-    students = Student.query.all()
-    
-    for student in students:
-        # محاسبه بدهی کل برای هر دانشجو
-        student_debt = 0
-        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-        for res in student_reservations:
-            student_debt += res.food_price
-            
-        # بدهی به صورت منفی ذخیره می‌شود
-        student.credit = -student_debt
-    
-    # ذخیره همه تغییرات یکجا
-    db.session.commit()
+    # به‌روزرسانی بدهی همه دانشجویان قبل از نمایش لیست با استفاده از تابع مرکزی
+    update_financial_statistics()
     
     # بازخوانی لیست دانشجویان پس از به‌روزرسانی
     students = Student.query.all()
@@ -501,6 +485,9 @@ def admin_reservations():
     if not current_user.is_admin:
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
+    
+    # به‌روزرسانی بدهی همه دانشجویان و آمار مالی قبل از نمایش
+    update_financial_statistics()
     
     # دریافت پارامترهای فیلتر
     feeding_code = request.args.get('feeding_code')
@@ -559,6 +546,9 @@ def admin_student_reservations(student_id):
     if not current_user.is_admin:
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
+    
+    # به‌روزرسانی آمار مالی و بدهی‌ها
+    update_financial_statistics()
     
     student = Student.query.get_or_404(student_id)
     reservations = Reservation.query.filter_by(student_id=student_id).all()
@@ -1024,6 +1014,9 @@ def admin_reports():
     if not current_user.is_admin:
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
+    
+    # به‌روزرسانی بدهی همه دانشجویان و آمار مالی قبل از نمایش گزارش‌ها
+    update_financial_statistics()
     
     # جمع‌آوری آمار برای غذاهای پرطرفدار
     food_stats = db.session.query(
