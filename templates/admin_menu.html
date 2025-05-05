@@ -130,21 +130,39 @@
                                         <td>
                                             <ul class="list-unstyled">
                                                 {% for food in day_item.meal_data.breakfast %}
-                                                <li>{{ food }}</li>
+                                                <li>
+                                                    {% if food is mapping %}
+                                                        {{ food.name }} <span class="badge bg-success">{{ food.price|default(2000) }} تومان</span>
+                                                    {% else %}
+                                                        {{ food }} <span class="badge bg-secondary">2000 تومان</span>
+                                                    {% endif %}
+                                                </li>
                                                 {% endfor %}
                                             </ul>
                                         </td>
                                         <td>
                                             <ul class="list-unstyled">
                                                 {% for food in day_item.meal_data.lunch %}
-                                                <li>{{ food }}</li>
+                                                <li>
+                                                    {% if food is mapping %}
+                                                        {{ food.name }} <span class="badge bg-success">{{ food.price|default(3000) }} تومان</span>
+                                                    {% else %}
+                                                        {{ food }} <span class="badge bg-secondary">3000 تومان</span>
+                                                    {% endif %}
+                                                </li>
                                                 {% endfor %}
                                             </ul>
                                         </td>
                                         <td>
                                             <ul class="list-unstyled">
                                                 {% for food in day_item.meal_data.dinner %}
-                                                <li>{{ food }}</li>
+                                                <li>
+                                                    {% if food is mapping %}
+                                                        {{ food.name }} <span class="badge bg-success">{{ food.price|default(5000) }} تومان</span>
+                                                    {% else %}
+                                                        {{ food }} <span class="badge bg-secondary">5000 تومان</span>
+                                                    {% endif %}
+                                                </li>
                                                 {% endfor %}
                                             </ul>
                                         </td>
@@ -209,8 +227,16 @@
                         
                         if (Array.isArray(foodItems)) {
                             // ترکیب لیست غذاها با خط جدید
-                            const foodText = foodItems.join('\n');
-                            foodItemsTextarea.value = foodText;
+                            let foodText = '';
+                            for (const item of foodItems) {
+                                // اگر آیتم شیء باشد، فقط نام آن را در نظر می‌گیریم
+                                if (typeof item === 'object' && item !== null && item.name) {
+                                    foodText += item.name + '\n';
+                                } else if (typeof item === 'string') {
+                                    foodText += item + '\n';
+                                }
+                            }
+                            foodItemsTextarea.value = foodText.trim();
                         } else {
                             console.warn('فرمت غیرمنتظره داده‌های غذا:', foodItems);
                             foodItemsTextarea.value = '';
