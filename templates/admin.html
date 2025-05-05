@@ -116,6 +116,37 @@
                             </div>
                         </div>
                         
+                        <!-- بخش آمار مالی -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h4>آمار مالی</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-4">
+                                                <div class="card text-bg-success h-100">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title">مجموع هزینه غذاهای تحویل شده</h5>
+                                                        <h1 class="display-4">{{ "{:,.0f}".format(total_delivered_price) }} تومان</h1>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-4">
+                                                <div class="card text-bg-warning h-100">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title">مجموع هزینه غذاهای در انتظار تحویل</h5>
+                                                        <h1 class="display-4">{{ "{:,.0f}".format(total_pending_price) }} تومان</h1>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row mt-4">
                             <div class="col-12 mb-4">
                                 <div class="card">

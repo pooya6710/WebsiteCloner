@@ -80,6 +80,7 @@
                                         <th>روز</th>
                                         <th>وعده</th>
                                         <th>غذا</th>
+                                        <th>قیمت (تومان)</th>
                                         <th>تاریخ رزرو</th>
                                         <th>وضعیت</th>
                                         <th>عملیات</th>
@@ -99,6 +100,7 @@
                                             {{ meal_mapping[reservation.meal] }}
                                         </td>
                                         <td>{{ reservation.food_name }}</td>
+                                        <td>{{ "{:,.0f}".format(reservation.food_price) }}</td>
                                         <td>{{ reservation.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
                                         <td>
                                             {% if reservation.delivered == 1 %}

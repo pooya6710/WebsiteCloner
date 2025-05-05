@@ -64,6 +64,49 @@
                         <a href="{{ url_for('admin_students') }}" class="btn btn-light">بازگشت به لیست دانشجویان</a>
                     </div>
                     <div class="card-body">
+                        <!-- نمایش خلاصه وضعیت مالی دانشجو -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title">خلاصه وضعیت مالی</h5>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>مجموع هزینه غذاهای تحویل شده:</th>
+                                                        <td>
+                                                            {% set delivered_total = 0 %}
+                                                            {% for r in reservations if r.delivered == 1 %}
+                                                                {% set delivered_total = delivered_total + r.food_price %}
+                                                            {% endfor %}
+                                                            <strong class="text-success">{{ "{:,.0f}".format(delivered_total) }} تومان</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>مجموع هزینه غذاهای در انتظار تحویل:</th>
+                                                        <td>
+                                                            {% set pending_total = 0 %}
+                                                            {% for r in reservations if r.delivered == 0 %}
+                                                                {% set pending_total = pending_total + r.food_price %}
+                                                            {% endfor %}
+                                                            <strong class="text-warning">{{ "{:,.0f}".format(pending_total) }} تومان</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>مجموع کل هزینه‌ها:</th>
+                                                        <td>
+                                                            {% set total = delivered_total + pending_total %}
+                                                            <strong class="text-primary">{{ "{:,.0f}".format(total) }} تومان</strong>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         {% if reservations %}
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
@@ -73,6 +116,7 @@
                                         <th>روز</th>
                                         <th>وعده</th>
                                         <th>غذا</th>
+                                        <th>قیمت (تومان)</th>
                                         <th>تاریخ رزرو</th>
                                         <th>وضعیت</th>
                                         <th>عملیات</th>
@@ -91,6 +135,7 @@
                                             {{ meal_mapping[reservation.meal] }}
                                         </td>
                                         <td>{{ reservation.food_name }}</td>
+                                        <td>{{ "{:,.0f}".format(reservation.food_price) }}</td>
                                         <td>{{ reservation.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
                                         <td>
                                             {% if reservation.delivered == 1 %}
