@@ -114,23 +114,25 @@
                                             <div class="card-body">
                                                 <div class="list-group">
                                                     {% for food in day_menu.meal_data.breakfast %}
+                                                    {% if loop.first %}
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div>
                                                             <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
                                                             <small class="d-block text-muted">
-                                                                {% if food is mapping and food.price %}{{ food.price|int }}{% else %}0{% endif %} تومان
+                                                                <strong>{% if food is mapping and food.price %}{{ food.price|int }}{% else %}2000{% endif %} تومان</strong>
                                                             </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
                                                             <input type="hidden" name="day" value="{{ day_menu.day }}">
                                                             <input type="hidden" name="meal" value="breakfast">
                                                             <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
-                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}0{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}2000{% endif %}">
                                                             <button type="submit" class="btn btn-sm btn-primary">
                                                                 <i class="bi bi-plus-lg"></i> رزرو
                                                             </button>
                                                         </form>
                                                     </div>
+                                                    {% endif %}
                                                     {% endfor %}
                                                 </div>
                                             </div>
@@ -148,23 +150,25 @@
                                             <div class="card-body">
                                                 <div class="list-group">
                                                     {% for food in day_menu.meal_data.lunch %}
+                                                    {% if loop.first %}
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div>
                                                             <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
                                                             <small class="d-block text-muted">
-                                                                {% if food is mapping and food.price %}{{ food.price|int }}{% else %}0{% endif %} تومان
+                                                                <strong>{% if food is mapping and food.price %}{{ food.price|int }}{% else %}3000{% endif %} تومان</strong>
                                                             </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
                                                             <input type="hidden" name="day" value="{{ day_menu.day }}">
                                                             <input type="hidden" name="meal" value="lunch">
                                                             <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
-                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}0{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}3000{% endif %}">
                                                             <button type="submit" class="btn btn-sm btn-primary">
                                                                 <i class="bi bi-plus-lg"></i> رزرو
                                                             </button>
                                                         </form>
                                                     </div>
+                                                    {% endif %}
                                                     {% endfor %}
                                                 </div>
                                             </div>
@@ -182,23 +186,25 @@
                                             <div class="card-body">
                                                 <div class="list-group">
                                                     {% for food in day_menu.meal_data.dinner %}
+                                                    {% if loop.first %}
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div>
                                                             <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
                                                             <small class="d-block text-muted">
-                                                                {% if food is mapping and food.price %}{{ food.price|int }}{% else %}0{% endif %} تومان
+                                                                <strong>{% if food is mapping and food.price %}{{ food.price|int }}{% else %}5000{% endif %} تومان</strong>
                                                             </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
                                                             <input type="hidden" name="day" value="{{ day_menu.day }}">
                                                             <input type="hidden" name="meal" value="dinner">
                                                             <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
-                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}0{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}5000{% endif %}">
                                                             <button type="submit" class="btn btn-sm btn-primary">
                                                                 <i class="bi bi-plus-lg"></i> رزرو
                                                             </button>
                                                         </form>
                                                     </div>
+                                                    {% endif %}
                                                     {% endfor %}
                                                 </div>
                                             </div>
