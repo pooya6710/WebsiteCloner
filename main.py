@@ -964,39 +964,7 @@ def settings():
         flash('خطا در سیستم رخ داده است. لطفا دوباره تلاش کنید.', 'danger')
         return redirect(url_for('dashboard'))
 
-# مسیر برای به‌روزرسانی دستی قیمت‌ها و آمار مالی
-@app.route('/admin/update_financial')
-@login_required
-def admin_update_financial():
-    if not current_user.is_admin:
-        flash('شما دسترسی به این بخش را ندارید', 'danger')
-        return redirect(url_for('dashboard'))
-    
-    # به‌روزرسانی قیمت‌ها و آمار مالی
-    if update_financial_statistics():
-        flash('قیمت‌ها و آمار مالی با موفقیت به‌روزرسانی شدند', 'success')
-    else:
-        flash('خطا در به‌روزرسانی قیمت‌ها و آمار مالی', 'danger')
-    
-    # بازگشت به صفحه قبلی (اگر ممکن باشد)
-    return redirect(request.referrer or url_for('admin'))
-
-# مسیر برای اصلاح قیمت‌های صفر در رزروها
-@app.route('/admin/fix-prices')
-@login_required
-def admin_fix_prices():
-    if not current_user.is_admin:
-        flash('شما دسترسی به این بخش را ندارید', 'danger')
-        return redirect(url_for('dashboard'))
-    
-    # اصلاح قیمت‌های صفر در رزروها
-    if update_reservation_prices():
-        flash('قیمت‌های رزروها با موفقیت اصلاح شدند', 'success')
-    else:
-        flash('خطا در اصلاح قیمت‌های رزروها', 'danger')
-    
-    # بازگشت به صفحه قبلی (اگر ممکن باشد)
-    return redirect(request.referrer or url_for('admin'))
+# مسیرهای تعمیر و نگهداری به درخواست کاربر حذف شدند
 
 
 @app.route('/cancel_all_day', methods=['POST'])
