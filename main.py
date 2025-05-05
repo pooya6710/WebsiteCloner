@@ -707,6 +707,44 @@ def admin_update_menu():
     
     return redirect(url_for('admin_menu'))
 
+# تابع به‌روزرسانی قیمت‌های غذا در رزروهای موجود
+def update_reservation_prices():
+    """
+    به‌روزرسانی قیمت‌های غذا در تمام رزروهای موجود بر اساس نوع وعده
+    """
+    print("✓ فراخوانی تابع به‌روزرسانی قیمت‌های غذا")
+    try:
+        # دریافت تمام رزروها
+        reservations = Reservation.query.all()
+        updated_count = 0
+        
+        for res in reservations:
+            old_price = res.food_price
+            
+            # تنظیم قیمت‌های ثابت بر اساس نوع وعده
+            if res.meal == 'breakfast':
+                res.food_price = 2000.0  # صبحانه
+            elif res.meal == 'lunch':
+                res.food_price = 3000.0  # ناهار
+            elif res.meal == 'dinner':
+                res.food_price = 5000.0  # شام
+            
+            if old_price != res.food_price:
+                updated_count += 1
+                print(f"   ✓ به‌روزرسانی رزرو {res.id}: {res.day}, {res.meal} - قیمت قدیم: {old_price} تومان، قیمت جدید: {res.food_price} تومان")
+        
+        # ذخیره تغییرات
+        db.session.commit()
+        print(f"✓ تعداد {updated_count} رزرو با موفقیت به‌روزرسانی شد")
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"✗ خطا در به‌روزرسانی قیمت‌های غذا: {e}")
+        import traceback
+        print(f"✗ جزئیات خطا: {traceback.format_exc()}")
+        logger.error(f"خطا در به‌روزرسانی قیمت‌های غذا: {e}")
+        return False
+
 # تابع بروزرسانی کامل آمار مالی و بدهی
 def update_financial_statistics():
     """
@@ -718,6 +756,10 @@ def update_financial_statistics():
     - بازدید از پنل‌های مدیریت و گزارش‌ها
     """
     print("✓ فراخوانی تابع به‌روزرسانی آمار مالی و بدهی دانشجویان")
+    
+    # ابتدا قیمت‌های رزروها را به‌روز می‌کنیم
+    update_reservation_prices()
+    
     try:
         # محاسبه بدهی همه دانشجویان
         students = Student.query.all()
@@ -909,7 +951,39 @@ def settings():
         flash('خطا در سیستم رخ داده است. لطفا دوباره تلاش کنید.', 'danger')
         return redirect(url_for('dashboard'))
 
-# این تابع در بالا تعریف شده است
+# مسیر برای به‌روزرسانی دستی قیمت‌ها و آمار مالی
+@app.route('/admin/update_financial')
+@login_required
+def admin_update_financial():
+    if not current_user.is_admin:
+        flash('شما دسترسی به این بخش را ندارید', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # به‌روزرسانی قیمت‌ها و آمار مالی
+    if update_financial_statistics():
+        flash('قیمت‌ها و آمار مالی با موفقیت به‌روزرسانی شدند', 'success')
+    else:
+        flash('خطا در به‌روزرسانی قیمت‌ها و آمار مالی', 'danger')
+    
+    # بازگشت به صفحه قبلی (اگر ممکن باشد)
+    return redirect(request.referrer or url_for('admin'))
+
+# مسیر برای اصلاح قیمت‌های صفر در رزروها
+@app.route('/admin/fix-prices')
+@login_required
+def admin_fix_prices():
+    if not current_user.is_admin:
+        flash('شما دسترسی به این بخش را ندارید', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # اصلاح قیمت‌های صفر در رزروها
+    if update_reservation_prices():
+        flash('قیمت‌های رزروها با موفقیت اصلاح شدند', 'success')
+    else:
+        flash('خطا در اصلاح قیمت‌های رزروها', 'danger')
+    
+    # بازگشت به صفحه قبلی (اگر ممکن باشد)
+    return redirect(request.referrer or url_for('admin'))
 
 
 @app.route('/cancel_all_day', methods=['POST'])
@@ -1184,5 +1258,10 @@ def admin_reports():
                            financial_day_stats=financial_day_stats)
 
 if __name__ == '__main__':
+    # به‌روزرسانی اولیه قیمت‌ها و آمار مالی
+    with app.app_context():
+        print("✓ به‌روزرسانی اولیه قیمت‌ها و آمار مالی قبل از شروع اپلیکیشن")
+        update_financial_statistics()
+    
     # شروع برنامه فلسک
     app.run(host='0.0.0.0', port=5000, debug=True)
