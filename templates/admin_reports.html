@@ -98,6 +98,31 @@
                         
                         <!-- محتوای تب‌ها -->
                         <div class="tab-content" id="reportTabsContent">
+                            <!-- خلاصه وضعیت مالی -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="alert alert-info">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">خلاصه وضعیت مالی</h5>
+                                            <span class="badge bg-primary">{{ "{:,.0f}".format(financial_stats.total_price) }} تومان</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 25px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                style="width: {{ financial_stats.delivered_percentage }}%;" 
+                                                aria-valuenow="{{ financial_stats.delivered_percentage }}" 
+                                                aria-valuemin="0" aria-valuemax="100">
+                                                تحویل شده ({{ "%.1f"|format(financial_stats.delivered_percentage) }}%)
+                                            </div>
+                                            <div class="progress-bar bg-warning" role="progressbar" 
+                                                style="width: {{ financial_stats.pending_percentage }}%;" 
+                                                aria-valuenow="{{ financial_stats.pending_percentage }}" 
+                                                aria-valuemin="0" aria-valuemax="100">
+                                                در انتظار ({{ "%.1f"|format(financial_stats.pending_percentage) }}%)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- آمار غذاهای پرطرفدار -->
                             <div class="tab-pane fade show active" id="food-content" role="tabpanel" aria-labelledby="food-tab">
                                 <div class="row">
