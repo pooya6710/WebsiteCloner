@@ -279,7 +279,15 @@ def reserve():
     try:
         food_price = float(food_price)
     except (ValueError, TypeError):
-        food_price = 0.0
+        # تنظیم قیمت‌های ثابت بر اساس نوع وعده
+        if meal == 'breakfast':
+            food_price = 2000.0  # صبحانه
+        elif meal == 'lunch':
+            food_price = 3000.0  # ناهار
+        elif meal == 'dinner':
+            food_price = 5000.0  # شام
+        else:
+            food_price = 0.0
     
     if not all([day, meal, food_name]):
         flash('لطفاً تمام فیلدها را پر کنید', 'danger')
@@ -310,6 +318,17 @@ def reserve():
         delivered=0
     )
     db.session.add(new_reservation)
+    db.session.commit()
+    
+    # به‌روزرسانی بدهی دانشجو
+    # محاسبه میزان بدهی دانشجو بر اساس تمام رزروها
+    student_debt = 0
+    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+    for reservation in student_reservations:
+        student_debt += reservation.food_price
+    
+    # بدهی به صورت منفی ذخیره می‌شود
+    student.credit = -student_debt
     db.session.commit()
     
     flash(f'رزرو شما برای {day} وعده {meal} با موفقیت ثبت شد', 'success')
@@ -395,6 +414,16 @@ def cancel_reservation(reservation_id):
         return redirect(url_for('dashboard'))
     
     db.session.delete(reservation)
+    db.session.commit()
+    
+    # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
+    student_debt = 0
+    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+    for res in student_reservations:
+        student_debt += res.food_price
+    
+    # بدهی به صورت منفی ذخیره می‌شود
+    student.credit = -student_debt
     db.session.commit()
     
     flash('رزرو با موفقیت لغو شد', 'success')
@@ -611,6 +640,18 @@ def admin_delivery(reservation_id):
     
     reservation = Reservation.query.get_or_404(reservation_id)
     reservation.delivered = 1  # تنظیم وضعیت تحویل به "تحویل شده"
+    
+    # به‌روزرسانی بدهی دانشجو پس از تأیید تحویل
+    student = Student.query.get(reservation.student_id)
+    if student:
+        student_debt = 0
+        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+        for res in student_reservations:
+            student_debt += res.food_price
+        
+        # بدهی به صورت منفی ذخیره می‌شود
+        student.credit = -student_debt
+    
     db.session.commit()
     
     flash('وضعیت تحویل غذا با موفقیت به‌روزرسانی شد', 'success')
@@ -653,7 +694,16 @@ def reserve_all_week():
                 # انتخاب اولین غذای هر وعده
                 food_item = day_menu.meal_data[meal][0]
                 food_name = food_item.get('name', food_item) if isinstance(food_item, dict) else food_item
-                food_price = food_item.get('price', 0) if isinstance(food_item, dict) else 0
+                
+                # تنظیم قیمت‌های ثابت بر اساس نوع وعده
+                if meal == 'breakfast':
+                    food_price = 2000.0  # صبحانه
+                elif meal == 'lunch':
+                    food_price = 3000.0  # ناهار
+                elif meal == 'dinner':
+                    food_price = 5000.0  # شام
+                else:
+                    food_price = food_item.get('price', 0) if isinstance(food_item, dict) else 0
                 
                 # ایجاد رزرو جدید
                 new_reservation = Reservation(
@@ -669,6 +719,17 @@ def reserve_all_week():
     
     if success_count > 0:
         db.session.commit()
+        
+        # به‌روزرسانی بدهی دانشجو
+        student_debt = 0
+        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+        for res in student_reservations:
+            student_debt += res.food_price
+        
+        # بدهی به صورت منفی ذخیره می‌شود
+        student.credit = -student_debt
+        db.session.commit()
+        
         meal_fa = 'وعده' if success_count == 1 else 'وعده'
         flash(f'{success_count} {meal_fa} غذا برای کل هفته با موفقیت رزرو شد', 'success')
     else:
@@ -756,6 +817,16 @@ def cancel_all_day():
     
     db.session.commit()
     
+    # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
+    student_debt = 0
+    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+    for res in student_reservations:
+        student_debt += res.food_price
+    
+    # بدهی به صورت منفی ذخیره می‌شود
+    student.credit = -student_debt
+    db.session.commit()
+    
     # انتخاب نام فارسی روز
     # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
     days = OrderedDict([
@@ -794,6 +865,16 @@ def cancel_all_week():
         db.session.delete(reservation)
         count += 1
     
+    db.session.commit()
+    
+    # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
+    student_debt = 0
+    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+    for res in student_reservations:
+        student_debt += res.food_price
+    
+    # بدهی به صورت منفی ذخیره می‌شود
+    student.credit = -student_debt
     db.session.commit()
     
     flash(f'{count} رزرو برای کل هفته با موفقیت لغو شد', 'success')
