@@ -879,11 +879,62 @@ def admin_reports():
             'percentage': percentage
         })
     
+    # آمار مالی - محاسبه هزینه‌ها
+    delivered_price = db.session.query(db.func.sum(Reservation.food_price)).filter_by(delivered=1).scalar() or 0
+    pending_price = db.session.query(db.func.sum(Reservation.food_price)).filter_by(delivered=0).scalar() or 0
+    total_price = delivered_price + pending_price
+    
+    # اطلاعات آماری مالی
+    financial_stats = {
+        'delivered_price': delivered_price,
+        'pending_price': pending_price,
+        'total_price': total_price,
+        'delivered_percentage': (delivered_price / total_price * 100) if total_price > 0 else 0,
+        'pending_percentage': (pending_price / total_price * 100) if total_price > 0 else 0,
+    }
+    
+    # آمار مالی به تفکیک وعده‌های غذایی
+    financial_meal_stats_data = db.session.query(
+        Reservation.meal,
+        db.func.sum(Reservation.food_price).label('price')
+    ).group_by(Reservation.meal).all()
+    
+    financial_meal_stats = []
+    for meal, price in financial_meal_stats_data:
+        percentage = (price / total_price * 100) if total_price > 0 else 0
+        financial_meal_stats.append({
+            'meal': meal,
+            'price': price,
+            'percentage': percentage
+        })
+    
+    # آمار مالی به تفکیک روز هفته
+    financial_day_stats_data = db.session.query(
+        Reservation.day,
+        db.func.sum(Reservation.food_price).label('price')
+    ).group_by(Reservation.day).all()
+    
+    financial_day_stats = []
+    for day, price in financial_day_stats_data:
+        percentage = (price / total_price * 100) if total_price > 0 else 0
+        financial_day_stats.append({
+            'day': day,
+            'day_name': days.get(day, day),  # نام فارسی روز
+            'price': price,
+            'percentage': percentage
+        })
+    
+    # مرتب‌سازی بر اساس ترتیب روزهای هفته
+    financial_day_stats.sort(key=lambda x: day_order.get(x['day'], 7))
+    
     return render_template('admin_reports.html', 
                            popular_foods=popular_foods,
                            daily_stats=daily_stats,
                            daily_stats_detail=daily_stats_detail,
-                           meal_stats=meal_stats)
+                           meal_stats=meal_stats,
+                           financial_stats=financial_stats,
+                           financial_meal_stats=financial_meal_stats,
+                           financial_day_stats=financial_day_stats)
 
 if __name__ == '__main__':
     # شروع برنامه فلسک

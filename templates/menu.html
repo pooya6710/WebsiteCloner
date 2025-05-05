@@ -116,14 +116,16 @@
                                                     {% for food in day_menu.meal_data.breakfast %}
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <span>{{ food.name }}</span>
-                                                            <small class="d-block text-muted">{{ food.price|int }} تومان</small>
+                                                            <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
+                                                            <small class="d-block text-muted">
+                                                                {% if food is mapping and food.price %}{{ food.price|int }}{% else %}0{% endif %} تومان
+                                                            </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
                                                             <input type="hidden" name="day" value="{{ day_menu.day }}">
                                                             <input type="hidden" name="meal" value="breakfast">
-                                                            <input type="hidden" name="food_name" value="{{ food.name }}">
-                                                            <input type="hidden" name="food_price" value="{{ food.price }}">
+                                                            <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}0{% endif %}">
                                                             <button type="submit" class="btn btn-sm btn-primary">
                                                                 <i class="bi bi-plus-lg"></i> رزرو
                                                             </button>
@@ -148,14 +150,16 @@
                                                     {% for food in day_menu.meal_data.lunch %}
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <span>{{ food.name }}</span>
-                                                            <small class="d-block text-muted">{{ food.price|int }} تومان</small>
+                                                            <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
+                                                            <small class="d-block text-muted">
+                                                                {% if food is mapping and food.price %}{{ food.price|int }}{% else %}0{% endif %} تومان
+                                                            </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
                                                             <input type="hidden" name="day" value="{{ day_menu.day }}">
                                                             <input type="hidden" name="meal" value="lunch">
-                                                            <input type="hidden" name="food_name" value="{{ food.name }}">
-                                                            <input type="hidden" name="food_price" value="{{ food.price }}">
+                                                            <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}0{% endif %}">
                                                             <button type="submit" class="btn btn-sm btn-primary">
                                                                 <i class="bi bi-plus-lg"></i> رزرو
                                                             </button>
@@ -180,14 +184,16 @@
                                                     {% for food in day_menu.meal_data.dinner %}
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <span>{{ food.name }}</span>
-                                                            <small class="d-block text-muted">{{ food.price|int }} تومان</small>
+                                                            <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
+                                                            <small class="d-block text-muted">
+                                                                {% if food is mapping and food.price %}{{ food.price|int }}{% else %}0{% endif %} تومان
+                                                            </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
                                                             <input type="hidden" name="day" value="{{ day_menu.day }}">
                                                             <input type="hidden" name="meal" value="dinner">
-                                                            <input type="hidden" name="food_name" value="{{ food.name }}">
-                                                            <input type="hidden" name="food_price" value="{{ food.price }}">
+                                                            <input type="hidden" name="food_name" value="{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}">
+                                                            <input type="hidden" name="food_price" value="{% if food is mapping and food.price %}{{ food.price }}{% else %}0{% endif %}">
                                                             <button type="submit" class="btn btn-sm btn-primary">
                                                                 <i class="bi bi-plus-lg"></i> رزرو
                                                             </button>
