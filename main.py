@@ -494,13 +494,31 @@ def admin_update_menu():
         flash('روز و وعده غذایی باید مشخص شوند', 'danger')
         return redirect(url_for('admin_menu'))
     
-    # پردازش لیست غذاها
-    food_items = [item.strip() for item in food_items_text.split('\n') if item.strip()]
-    
     try:
+        # پردازش لیست غذاها با اضافه کردن قیمت ثابت بر اساس نوع وعده
+        food_items = []
+        for item in food_items_text.split('\n'):
+            if item.strip():
+                # تعیین قیمت بر اساس نوع وعده غذایی
+                if meal == 'breakfast':
+                    price = 2000  # صبحانه 2 هزار تومان
+                elif meal == 'lunch':
+                    price = 3000  # ناهار 3 هزار تومان
+                elif meal == 'dinner':
+                    price = 5000  # شام 5 هزار تومان
+                else:
+                    price = 0
+                
+                # افزودن به صورت دیکشنری با قیمت
+                food_items.append({"name": item.strip(), "price": price})
+        
+        # محدود کردن به یک غذا برای هر وعده
+        if len(food_items) > 1:
+            food_items = [food_items[0]]
+            
         # لاگ اطلاعات ورودی برای دیباگ
         print(f"Updating menu - Day: {day}, Meal: {meal}")
-        print(f"Food items: {food_items}")
+        print(f"Food items with prices: {food_items}")
         
         # دریافت منوی روز مورد نظر
         day_menu = Menu.query.filter_by(day=day).first()
