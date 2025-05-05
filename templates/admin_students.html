@@ -77,6 +77,8 @@
                                     <tr>
                                         <th>شناسه</th>
                                         <th>کد تغذیه</th>
+                                        <th>اعتبار (تومان)</th>
+                                        <th>بدهی (تومان)</th>
                                         <th>تعداد رزروها</th>
                                         <th>عملیات</th>
                                     </tr>
@@ -86,6 +88,8 @@
                                     <tr>
                                         <td>{{ student.id }}</td>
                                         <td>{{ student.feeding_code }}</td>
+                                        <td>{{ student.credit|default(0)|int }}</td>
+                                        <td>{{ student.debt|default(0)|int }}</td>
                                         <td>{{ student.reservations|length }}</td>
                                         <td>
                                             <a href="{{ url_for('admin_student_reservations', student_id=student.id) }}" class="btn btn-sm btn-info">مشاهده رزروها</a>

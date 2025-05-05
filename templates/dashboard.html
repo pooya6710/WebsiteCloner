@@ -93,11 +93,21 @@
                             <i class="bi bi-cash-stack fs-1 me-3 text-danger"></i>
                             <div>
                                 <h5 class="mb-0">بدهی دانشجو:</h5>
-                                {% set total_debt = 0 %}
+                                <p class="fs-4 mb-0">{{ student.debt|default(0)|int }} تومان</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-cart-check fs-1 me-3 text-warning"></i>
+                            <div>
+                                <h5 class="mb-0">غذاهای رزرو شده:</h5>
+                                {% set upcoming_cost = 0 %}
                                 {% for reservation in reservations %}
-                                    {% set total_debt = total_debt + reservation.food_price %}
+                                    {% if reservation.delivered == 0 %}
+                                        {% set upcoming_cost = upcoming_cost + reservation.food_price %}
+                                    {% endif %}
                                 {% endfor %}
-                                <p class="fs-4 mb-0">{{ total_debt|int }} تومان</p>
+                                <p class="fs-4 mb-0">{{ upcoming_cost|int }} تومان</p>
                             </div>
                         </div>
                         
