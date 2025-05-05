@@ -463,6 +463,23 @@ def admin_students():
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
+    # به‌روزرسانی بدهی همه دانشجویان قبل از نمایش لیست
+    students = Student.query.all()
+    
+    for student in students:
+        # محاسبه بدهی کل برای هر دانشجو
+        student_debt = 0
+        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+        for res in student_reservations:
+            student_debt += res.food_price
+            
+        # بدهی به صورت منفی ذخیره می‌شود
+        student.credit = -student_debt
+    
+    # ذخیره همه تغییرات یکجا
+    db.session.commit()
+    
+    # بازخوانی لیست دانشجویان پس از به‌روزرسانی
     students = Student.query.all()
     return render_template('admin_students.html', students=students)
 
@@ -790,44 +807,6 @@ def cancel_all_day():
         return redirect(url_for('dashboard'))
     
     # دریافت رزروهای روز مورد نظر
-    reservations = Reservation.query.filter_by(
-        student_id=student.id, day=day, delivered=0
-    ).all()
-    
-    if not reservations:
-        # انتخاب نام فارسی روز
-        # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
-        days = OrderedDict([
-            ("saturday", "شنبه"),
-            ("sunday", "یکشنبه"),
-            ("monday", "دوشنبه"),
-            ("tuesday", "سه‌شنبه"),
-            ("wednesday", "چهارشنبه"),
-            ("thursday", "پنج‌شنبه"),
-            ("friday", "جمعه")
-        ])
-        flash(f'شما رزرو قابل لغوی برای روز {days.get(day, day)} ندارید', 'warning')
-        return redirect(url_for('dashboard'))
-    
-    # حذف رزروها
-    count = 0
-    for reservation in reservations:
-        db.session.delete(reservation)
-        count += 1
-    
-    db.session.commit()
-    
-    # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
-    student_debt = 0
-    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-    for res in student_reservations:
-        student_debt += res.food_price
-    
-    # بدهی به صورت منفی ذخیره می‌شود
-    student.credit = -student_debt
-    db.session.commit()
-    
-    # انتخاب نام فارسی روز
     # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
     days = OrderedDict([
         ("saturday", "شنبه"),
@@ -838,8 +817,43 @@ def cancel_all_day():
         ("thursday", "پنج‌شنبه"),
         ("friday", "جمعه")
     ])
-    flash(f'{count} رزرو برای روز {days.get(day, day)} با موفقیت لغو شد', 'success')
-    return redirect(url_for('dashboard'))
+    
+    try:
+        # دریافت رزروهای روز مورد نظر - تمام رزرو ها، نه فقط آنهایی که تحویل نشده‌اند
+        reservations = Reservation.query.filter_by(
+            student_id=student.id, day=day
+        ).all()
+        
+        if not reservations:
+            flash(f'شما رزرو قابل لغوی برای روز {days.get(day, day)} ندارید', 'warning')
+            return redirect(url_for('dashboard'))
+        
+        # حذف رزروها
+        count = 0
+        for reservation in reservations:
+            db.session.delete(reservation)
+            count += 1
+        
+        db.session.commit()
+        
+        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
+        student_debt = 0
+        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+        for res in student_reservations:
+            student_debt += res.food_price
+        
+        # بدهی به صورت منفی ذخیره می‌شود
+        student.credit = -student_debt
+        db.session.commit()
+        
+        flash(f'{count} رزرو برای روز {days.get(day, day)} با موفقیت لغو شد', 'success')
+        return redirect(url_for('dashboard'))
+    
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in cancel_all_day: {str(e)}")
+        flash('خطا در لغو رزروها، لطفا دوباره تلاش کنید', 'danger')
+        return redirect(url_for('dashboard'))
 
 @app.route('/cancel_all_week', methods=['POST'])
 @login_required
@@ -850,35 +864,36 @@ def cancel_all_week():
         flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
         return redirect(url_for('dashboard'))
     
-    # دریافت همه رزروهای قابل لغو
-    reservations = Reservation.query.filter_by(
-        student_id=student.id, delivered=0
-    ).all()
-    
-    if not reservations:
-        flash('شما هیچ رزرو قابل لغوی ندارید', 'warning')
+    try:
+        # دریافت همه رزروها، نه فقط آنهایی که تحویل نشده‌اند
+        reservations = Reservation.query.filter_by(
+            student_id=student.id
+        ).all()
+        
+        if not reservations:
+            flash('شما هیچ رزروی ندارید', 'warning')
+            return redirect(url_for('dashboard'))
+        
+        # حذف رزروها
+        count = 0
+        for reservation in reservations:
+            db.session.delete(reservation)
+            count += 1
+        
+        db.session.commit()
+        
+        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو - باید صفر باشد چون همه رزروها حذف شدند
+        student.credit = 0  # بدهی صفر می‌شود
+        db.session.commit()
+        
+        flash(f'{count} رزرو برای کل هفته با موفقیت لغو شد', 'success')
         return redirect(url_for('dashboard'))
     
-    # حذف رزروها
-    count = 0
-    for reservation in reservations:
-        db.session.delete(reservation)
-        count += 1
-    
-    db.session.commit()
-    
-    # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
-    student_debt = 0
-    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-    for res in student_reservations:
-        student_debt += res.food_price
-    
-    # بدهی به صورت منفی ذخیره می‌شود
-    student.credit = -student_debt
-    db.session.commit()
-    
-    flash(f'{count} رزرو برای کل هفته با موفقیت لغو شد', 'success')
-    return redirect(url_for('dashboard'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in cancel_all_week: {str(e)}")
+        flash('خطا در لغو رزروها، لطفا دوباره تلاش کنید', 'danger')
+        return redirect(url_for('dashboard'))
 
 @app.route('/admin/reports')
 @login_required
