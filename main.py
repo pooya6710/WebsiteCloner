@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+import jdatetime
 from collections import OrderedDict
 from flask import request, jsonify, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
@@ -21,6 +22,20 @@ with app.app_context():
     # بارگذاری منوی پیش‌فرض (اگر وجود نداشته باشد)
     from models import load_default_menu
     load_default_menu(db.session)
+    
+# تابع تبدیل تاریخ میلادی به شمسی
+def gregorian_to_jalali(date_obj):
+    """تبدیل تاریخ میلادی به شمسی"""
+    if date_obj is None:
+        return None
+    return jdatetime.date.fromgregorian(date=date_obj.date())
+
+# تابع تبدیل تاریخ و زمان میلادی به شمسی
+def gregorian_to_jalali_datetime(datetime_obj):
+    """تبدیل تاریخ و زمان میلادی به شمسی"""
+    if datetime_obj is None:
+        return None
+    return jdatetime.datetime.fromgregorian(datetime=datetime_obj)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -206,7 +221,19 @@ def dashboard():
     # دریافت رزروهای دانشجو
     reservations = Reservation.query.filter_by(student_id=student.id).all()
     
-    return render_template('dashboard.html', student=student, reservations=reservations)
+    # تبدیل تاریخ‌ها به شمسی
+    jalali_dates = {}
+    for reservation in reservations:
+        jalali_dates[reservation.id] = gregorian_to_jalali_datetime(reservation.timestamp).strftime('%Y/%m/%d %H:%M:%S')
+    
+    # تاریخ فعلی به شمسی
+    now_jalali = gregorian_to_jalali_datetime(datetime.datetime.now()).strftime('%Y/%m/%d')
+    
+    return render_template('dashboard.html', 
+                           student=student, 
+                           reservations=reservations, 
+                           jalali_dates=jalali_dates,
+                           now_jalali=now_jalali)
 
 @app.route('/menu')
 @login_required

@@ -128,6 +128,7 @@
                                         <th>روز</th>
                                         <th>وعده</th>
                                         <th>غذا</th>
+                                        <th>تاریخ ثبت (شمسی)</th>
                                         <th>وضعیت</th>
                                         <th>عملیات</th>
                                     </tr>
@@ -144,6 +145,7 @@
                                             {{ meal_mapping[reservation.meal] }}
                                         </td>
                                         <td>{{ reservation.food_name }}</td>
+                                        <td>{{ jalali_dates[reservation.id] }}</td>
                                         <td>
                                             {% if reservation.delivered == 1 %}
                                             <span class="badge bg-success">تحویل شده</span>

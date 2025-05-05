@@ -54,6 +54,7 @@ class Reservation(db.Model):
     day = Column(String(20), nullable=False)  # روز هفته
     meal = Column(String(20), nullable=False)  # وعده غذایی
     food_name = Column(String(100), nullable=False)  # نام غذا
+    food_price = Column(Float, default=0.0)  # قیمت غذا (به تومان)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     delivered = Column(Integer, default=0)  # وضعیت تحویل: 0=تحویل نشده، 1=تحویل شده
     
@@ -94,6 +95,23 @@ class Payment(db.Model):
     def __repr__(self):
         return f"<Payment(student_id={self.student_id}, amount={self.amount}, status='{self.status}')>"
 
+class Notification(db.Model):
+    """مدل اعلان‌ها برای اطلاع‌رسانی به کاربران"""
+    __tablename__ = 'notifications'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    title = Column(String(100), nullable=False)
+    message = Column(Text, nullable=False)
+    read = Column(Boolean, default=False)  # وضعیت خوانده شدن: False=خوانده نشده، True=خوانده شده
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    # ارتباط با کاربر
+    user = relationship("User", backref=db.backref('notifications', lazy=True))
+    
+    def __repr__(self):
+        return f"<Notification(user_id={self.user_id}, title='{self.title}', read={self.read})>"
+
 class DatabaseBackup(db.Model):
     """مدل پشتیبان‌گیری از دیتابیس"""
     __tablename__ = 'backups'
@@ -120,39 +138,123 @@ def load_default_menu(db_session):
         # منوی پیش‌فرض
         default_menu = OrderedDict([
             ("saturday", {
-                "breakfast": ["نان و پنیر و گردو", "املت", "نیمرو"],
-                "lunch": ["چلو کباب کوبیده", "قیمه", "قورمه سبزی"],
-                "dinner": ["ماکارونی", "عدس پلو", "کتلت"]
+                "breakfast": [
+                    {"name": "نان و پنیر و گردو", "price": 15000},
+                    {"name": "املت", "price": 20000},
+                    {"name": "نیمرو", "price": 18000}
+                ],
+                "lunch": [
+                    {"name": "چلو کباب کوبیده", "price": 45000},
+                    {"name": "قیمه", "price": 35000},
+                    {"name": "قورمه سبزی", "price": 38000}
+                ],
+                "dinner": [
+                    {"name": "ماکارونی", "price": 32000},
+                    {"name": "عدس پلو", "price": 30000},
+                    {"name": "کتلت", "price": 35000}
+                ]
             }),
             ("sunday", {
-                "breakfast": ["نان و پنیر و خرما", "تخم مرغ آبپز", "حلیم"],
-                "lunch": ["زرشک پلو با مرغ", "خورشت بادمجان", "کوکو سبزی"],
-                "dinner": ["چلو کباب جوجه", "خوراک لوبیا", "استانبولی پلو"]
+                "breakfast": [
+                    {"name": "نان و پنیر و خرما", "price": 16000},
+                    {"name": "تخم مرغ آبپز", "price": 18000},
+                    {"name": "حلیم", "price": 25000}
+                ],
+                "lunch": [
+                    {"name": "زرشک پلو با مرغ", "price": 48000},
+                    {"name": "خورشت بادمجان", "price": 36000},
+                    {"name": "کوکو سبزی", "price": 32000}
+                ],
+                "dinner": [
+                    {"name": "چلو کباب جوجه", "price": 50000},
+                    {"name": "خوراک لوبیا", "price": 30000},
+                    {"name": "استانبولی پلو", "price": 33000}
+                ]
             }),
             ("monday", {
-                "breakfast": ["نان و کره و مربا", "نان و تخم مرغ", "شیر و غلات"],
-                "lunch": ["چلو خورشت قیمه", "کوبیده", "فسنجان"],
-                "dinner": ["خوراک مرغ", "کشک و بادمجان", "کوفته تبریزی"]
+                "breakfast": [
+                    {"name": "نان و کره و مربا", "price": 16000},
+                    {"name": "نان و تخم مرغ", "price": 20000},
+                    {"name": "شیر و غلات", "price": 22000}
+                ],
+                "lunch": [
+                    {"name": "چلو خورشت قیمه", "price": 38000},
+                    {"name": "کوبیده", "price": 45000},
+                    {"name": "فسنجان", "price": 42000}
+                ],
+                "dinner": [
+                    {"name": "خوراک مرغ", "price": 40000},
+                    {"name": "کشک و بادمجان", "price": 32000},
+                    {"name": "کوفته تبریزی", "price": 35000}
+                ]
             }),
             ("tuesday", {
-                "breakfast": ["نان و پنیر و سبزی", "املت", "عدسی"],
-                "lunch": ["چلو کباب بختیاری", "چلو خورشت سبزی", "کوکو سیب زمینی"],
-                "dinner": ["الویه", "میرزا قاسمی", "حلیم بادمجان"]
+                "breakfast": [
+                    {"name": "نان و پنیر و سبزی", "price": 17000},
+                    {"name": "املت", "price": 20000},
+                    {"name": "عدسی", "price": 22000}
+                ],
+                "lunch": [
+                    {"name": "چلو کباب بختیاری", "price": 55000},
+                    {"name": "چلو خورشت سبزی", "price": 40000},
+                    {"name": "کوکو سیب زمینی", "price": 30000}
+                ],
+                "dinner": [
+                    {"name": "الویه", "price": 35000},
+                    {"name": "میرزا قاسمی", "price": 32000},
+                    {"name": "حلیم بادمجان", "price": 34000}
+                ]
             }),
             ("wednesday", {
-                "breakfast": ["نان و پنیر و گردو", "تخم مرغ نیمرو", "آش"],
-                "lunch": ["چلو جوجه کباب", "چلو قورمه سبزی", "دلمه برگ مو"],
-                "dinner": ["کتلت", "عدس پلو", "ماکارونی"]
+                "breakfast": [
+                    {"name": "نان و پنیر و گردو", "price": 15000},
+                    {"name": "تخم مرغ نیمرو", "price": 18000},
+                    {"name": "آش", "price": 25000}
+                ],
+                "lunch": [
+                    {"name": "چلو جوجه کباب", "price": 50000},
+                    {"name": "چلو قورمه سبزی", "price": 38000},
+                    {"name": "دلمه برگ مو", "price": 36000}
+                ],
+                "dinner": [
+                    {"name": "کتلت", "price": 35000},
+                    {"name": "عدس پلو", "price": 30000},
+                    {"name": "ماکارونی", "price": 32000}
+                ]
             }),
             ("thursday", {
-                "breakfast": ["نان و مربا و کره", "نیمرو", "آش رشته"],
-                "lunch": ["چلو کباب کوبیده", "چلو خورشت قیمه", "کباب تابه ای"],
-                "dinner": ["خوراک مرغ", "کوکو سبزی", "خوراک لوبیا"]
+                "breakfast": [
+                    {"name": "نان و مربا و کره", "price": 16000},
+                    {"name": "نیمرو", "price": 18000},
+                    {"name": "آش رشته", "price": 25000}
+                ],
+                "lunch": [
+                    {"name": "چلو کباب کوبیده", "price": 45000},
+                    {"name": "چلو خورشت قیمه", "price": 38000},
+                    {"name": "کباب تابه ای", "price": 40000}
+                ],
+                "dinner": [
+                    {"name": "خوراک مرغ", "price": 40000},
+                    {"name": "کوکو سبزی", "price": 32000},
+                    {"name": "خوراک لوبیا", "price": 30000}
+                ]
             }),
             ("friday", {
-                "breakfast": ["نان و کره و مربا", "نان و پنیر", "آش"],
-                "lunch": ["استانبولی پلو", "عدس پلو", "کباب تابه ای"],
-                "dinner": ["چلو کباب", "املت", "سالاد الویه"]
+                "breakfast": [
+                    {"name": "نان و کره و مربا", "price": 16000},
+                    {"name": "نان و پنیر", "price": 15000},
+                    {"name": "آش", "price": 25000}
+                ],
+                "lunch": [
+                    {"name": "استانبولی پلو", "price": 33000},
+                    {"name": "عدس پلو", "price": 30000},
+                    {"name": "کباب تابه ای", "price": 40000}
+                ],
+                "dinner": [
+                    {"name": "چلو کباب", "price": 45000},
+                    {"name": "املت", "price": 20000},
+                    {"name": "سالاد الویه", "price": 35000}
+                ]
             })
         ])
         
