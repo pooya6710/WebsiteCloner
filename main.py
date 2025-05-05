@@ -654,30 +654,36 @@ def reserve_all_week():
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    if request.method == 'POST':
-        current_password = request.form.get('current_password')
-        new_password = request.form.get('new_password')
-        confirm_password = request.form.get('confirm_password')
+    try:
+        if request.method == 'POST':
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+            
+            # بررسی تطابق رمز عبور جدید
+            if new_password != confirm_password:
+                flash('رمز عبور جدید و تکرار آن مطابقت ندارند', 'danger')
+                return redirect(url_for('settings'))
+            
+            # بررسی رمز عبور فعلی
+            user = User.query.get(current_user.id)
+            if not check_password_hash(user.password, current_password):
+                flash('رمز عبور فعلی نادرست است', 'danger')
+                return redirect(url_for('settings'))
+            
+            # به‌روزرسانی رمز عبور
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+            
+            flash('رمز عبور شما با موفقیت تغییر یافت', 'success')
+            return redirect(url_for('dashboard'))
         
-        # بررسی تطابق رمز عبور جدید
-        if new_password != confirm_password:
-            flash('رمز عبور جدید و تکرار آن مطابقت ندارند', 'danger')
-            return redirect(url_for('settings'))
-        
-        # بررسی رمز عبور فعلی
-        user = User.query.get(current_user.id)
-        if not check_password_hash(user.password, current_password):
-            flash('رمز عبور فعلی نادرست است', 'danger')
-            return redirect(url_for('settings'))
-        
-        # به‌روزرسانی رمز عبور
-        user.password = generate_password_hash(new_password)
-        db.session.commit()
-        
-        flash('رمز عبور شما با موفقیت تغییر یافت', 'success')
+        # استفاده از try-except برای دیباگ
+        return render_template('settings.html')
+    except Exception as e:
+        logger.error(f"Error in settings route: {str(e)}")
+        flash('خطا در سیستم رخ داده است. لطفا دوباره تلاش کنید.', 'danger')
         return redirect(url_for('dashboard'))
-    
-    return render_template('settings.html')
 
 @app.route('/cancel_all_day', methods=['POST'])
 @login_required
