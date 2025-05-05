@@ -490,8 +490,56 @@ def admin_reservations():
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
-    reservations = Reservation.query.all()
-    return render_template('admin_reservations.html', reservations=reservations)
+    # دریافت پارامترهای فیلتر
+    feeding_code = request.args.get('feeding_code')
+    day_filter = request.args.get('day')
+    meal_filter = request.args.get('meal')
+    
+    # پایه کوئری
+    query = db.session.query(Reservation).join(Student)
+    
+    # اعمال فیلترها
+    if feeding_code:
+        query = query.filter(Student.feeding_code == feeding_code)
+    
+    if day_filter:
+        query = query.filter(Reservation.day == day_filter)
+        
+    if meal_filter:
+        query = query.filter(Reservation.meal == meal_filter)
+    
+    # مرتب‌سازی نتایج
+    reservations = query.order_by(Reservation.day, Reservation.meal).all()
+    
+    # ترجمه نام روزها و وعده‌ها
+    day_mapping = {
+        "saturday": "شنبه",
+        "sunday": "یکشنبه",
+        "monday": "دوشنبه",
+        "tuesday": "سه‌شنبه",
+        "wednesday": "چهارشنبه",
+        "thursday": "پنج‌شنبه",
+        "friday": "جمعه"
+    }
+    
+    meal_mapping = {
+        "breakfast": "صبحانه",
+        "lunch": "ناهار",
+        "dinner": "شام"
+    }
+    
+    # گروه‌بندی رزروها بر اساس روز
+    days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
+    
+    # ارسال تمام داده‌های مورد نیاز به قالب
+    return render_template('admin_reservations.html', 
+                          reservations=reservations,
+                          days=days,
+                          day_mapping=day_mapping,
+                          meal_mapping=meal_mapping,
+                          feeding_code=feeding_code,
+                          day_filter=day_filter,
+                          meal_filter=meal_filter)
 
 @app.route('/admin/student/<int:student_id>/reservations')
 @login_required
@@ -626,13 +674,31 @@ def admin_update_menu():
         
         # بررسی و لاگ داده‌های جدید
         print(f"New meal_data structure: {current_data}")
-        day_menu.meal_data = current_data
+        
+        # استفاده از مقدار جدید برای بروزرسانی
+        import copy
+        import json
+        
+        # ایجاد یک کپی عمیق از داده‌ها برای اطمینان از تغییر واقعی
+        new_menu_data = copy.deepcopy(current_data)
+        
+        # تنظیم به صورت دستی (به جای تخصیص مستقیم)
+        day_menu.meal_data = new_menu_data
+        
+        # یک تغییر مختصر برای اطمینان از تشخیص تغییر توسط SQLAlchemy
+        from sqlalchemy import func
+        from sqlalchemy.sql.expression import text
+        day_menu.id = day_menu.id  # این خط یک "dirty" flag در SQLAlchemy ایجاد می‌کند
         
         # کامیت کردن تغییرات به دیتابیس
+        db.session.add(day_menu)  # مطمئن شویم که تغییرات ثبت می‌شوند
         db.session.commit()
         print(f"Successfully committed changes to database")
         
-        # تایید نهایی تغییرات
+        # تخلیه کش SQLAlchemy
+        db.session.expire_all()
+        
+        # تایید نهایی تغییرات با دریافت مجدد از دیتابیس
         updated_menu = Menu.query.get(day_menu.id)
         print(f"Verification - Updated menu data: {updated_menu.meal_data}")
         
