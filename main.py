@@ -264,6 +264,12 @@ def reserve():
     day = request.form.get('day')
     meal = request.form.get('meal')
     food_name = request.form.get('food_name')
+    food_price = request.form.get('food_price', 0)
+    
+    try:
+        food_price = float(food_price)
+    except (ValueError, TypeError):
+        food_price = 0.0
     
     if not all([day, meal, food_name]):
         flash('لطفاً تمام فیلدها را پر کنید', 'danger')
@@ -290,6 +296,7 @@ def reserve():
         day=day,
         meal=meal,
         food_name=food_name,
+        food_price=food_price,
         delivered=0
     )
     db.session.add(new_reservation)
@@ -339,7 +346,9 @@ def reserve_all_day():
                 continue
             
             # انتخاب اولین غذای هر وعده
-            food_name = meal_data[meal][0]
+            food_item = meal_data[meal][0]
+            food_name = food_item.get('name', food_item) if isinstance(food_item, dict) else food_item
+            food_price = food_item.get('price', 0) if isinstance(food_item, dict) else 0
             
             # ایجاد رزرو جدید
             new_reservation = Reservation(
@@ -347,6 +356,7 @@ def reserve_all_day():
                 day=day,
                 meal=meal,
                 food_name=food_name,
+                food_price=food_price,
                 delivered=0
             )
             db.session.add(new_reservation)
@@ -393,11 +403,19 @@ def admin():
     delivered_count = Reservation.query.filter_by(delivered=1).count()
     pending_count = Reservation.query.filter_by(delivered=0).count()
     
+    # محاسبه کل هزینه غذاهای تحویل شده
+    total_delivered_price = db.session.query(db.func.sum(Reservation.food_price)).filter_by(delivered=1).scalar() or 0
+    
+    # محاسبه کل هزینه غذاهای منتظر تحویل
+    total_pending_price = db.session.query(db.func.sum(Reservation.food_price)).filter_by(delivered=0).scalar() or 0
+    
     return render_template('admin.html', 
                            student_count=student_count,
                            reservation_count=reservation_count,
                            delivered_count=delivered_count,
-                           pending_count=pending_count)
+                           pending_count=pending_count,
+                           total_delivered_price=total_delivered_price,
+                           total_pending_price=total_pending_price)
 
 @app.route('/admin/students')
 @login_required
@@ -605,7 +623,9 @@ def reserve_all_week():
                     continue
                 
                 # انتخاب اولین غذای هر وعده
-                food_name = day_menu.meal_data[meal][0]
+                food_item = day_menu.meal_data[meal][0]
+                food_name = food_item.get('name', food_item) if isinstance(food_item, dict) else food_item
+                food_price = food_item.get('price', 0) if isinstance(food_item, dict) else 0
                 
                 # ایجاد رزرو جدید
                 new_reservation = Reservation(
@@ -613,6 +633,7 @@ def reserve_all_week():
                     day=day_menu.day,
                     meal=meal,
                     food_name=food_name,
+                    food_price=food_price,
                     delivered=0
                 )
                 db.session.add(new_reservation)
