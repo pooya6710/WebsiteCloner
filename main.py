@@ -9,8 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import app, db, login_manager, logger, security_logger, login_attempts, max_login_attempts, login_timeout
 from zarinpal import ZarinPal
 
-# درگاه پرداخت زرین‌پال
-zarinpal_gateway = ZarinPal(sandbox=True)  # استفاده از محیط تست
+# حذف درگاه پرداخت زرین‌پال به درخواست کاربر
+# zarinpal_gateway = ZarinPal(sandbox=True)  # استفاده از محیط تست
 
 # Create all database tables
 with app.app_context():
