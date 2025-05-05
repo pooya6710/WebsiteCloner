@@ -414,17 +414,8 @@ def cancel_reservation(reservation_id):
         db.session.delete(reservation)
         db.session.commit()
         
-        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
-        student_debt = 0
-        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-        for res in student_reservations:
-            student_debt += res.food_price
-        
-        # بدهی به صورت منفی ذخیره می‌شود
-        student.credit = -student_debt
-        db.session.commit()
-        
-        # بروزرسانی آمار
+        # به‌روزرسانی آمار مالی و بدهی‌ها از طریق تابع مرکزی
+        print("✓ فراخوانی تابع به‌روزرسانی آمار مالی پس از لغو رزرو انفرادی")
         update_financial_statistics()
         
         flash('رزرو با موفقیت لغو شد', 'success')
@@ -726,24 +717,49 @@ def update_financial_statistics():
     - تایید تحویل غذا
     - بازدید از پنل‌های مدیریت و گزارش‌ها
     """
+    print("✓ فراخوانی تابع به‌روزرسانی آمار مالی و بدهی دانشجویان")
     try:
         # محاسبه بدهی همه دانشجویان
         students = Student.query.all()
+        print(f"✓ تعداد دانشجویان برای به‌روزرسانی: {len(students)}")
+        
+        # ریست کردن بدهی همه دانشجویان برای اطمینان از به‌روزرسانی صحیح
+        for student in students:
+            student.credit = 0
+        db.session.flush()
+        
         for student in students:
             # محاسبه بدهی کل برای هر دانشجو
             student_debt = 0
-            student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+            # فقط رزروهای تحویل نشده در بدهی حساب می‌شوند
+            student_reservations = Reservation.query.filter_by(student_id=student.id, delivered=0).all()
+            
+            print(f"✓ دانشجو: {student.feeding_code}, تعداد رزروهای تحویل نشده: {len(student_reservations)}")
+            
             for res in student_reservations:
                 student_debt += res.food_price
+                print(f"   - رزرو: {res.day}, {res.meal}, قیمت: {res.food_price} تومان")
                 
             # بدهی به صورت منفی ذخیره می‌شود
             student.credit = -student_debt
+            print(f"✓ بدهی نهایی دانشجو {student.feeding_code}: {-student.credit} تومان")
         
-        # ذخیره تغییرات
+        # ذخیره تغییرات و اطمینان از commit شدن آنها
         db.session.commit()
+        print("✓ تمام بدهی‌ها با موفقیت به‌روزرسانی شدند")
+        
+        # تأیید به‌روزرسانی موفق
+        updated_students = Student.query.all()
+        for student in updated_students:
+            if student.credit != 0:
+                print(f"→ تأیید به‌روزرسانی: دانشجو {student.feeding_code} با بدهی {-student.credit} تومان")
+        
         return True
     except Exception as e:
         db.session.rollback()
+        print(f"✗ خطا در به‌روزرسانی آمار مالی: {e}")
+        import traceback
+        print(f"✗ جزئیات خطا: {traceback.format_exc()}")
         logger.error(f"خطا در بروزرسانی آمار مالی: {e}")
         return False
 
@@ -845,15 +861,9 @@ def reserve_all_week():
     if success_count > 0:
         db.session.commit()
         
-        # به‌روزرسانی بدهی دانشجو
-        student_debt = 0
-        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-        for res in student_reservations:
-            student_debt += res.food_price
-        
-        # بدهی به صورت منفی ذخیره می‌شود
-        student.credit = -student_debt
-        db.session.commit()
+        # به‌روزرسانی آمار مالی و بدهی‌ها از طریق تابع مرکزی
+        print("✓ فراخوانی تابع به‌روزرسانی آمار مالی پس از رزرو هفتگی")
+        update_financial_statistics()
         
         meal_fa = 'وعده' if success_count == 1 else 'وعده'
         flash(f'{success_count} {meal_fa} غذا برای کل هفته با موفقیت رزرو شد', 'success')
@@ -947,17 +957,8 @@ def cancel_all_day():
         
         db.session.commit()
         
-        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
-        student_debt = 0
-        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-        for res in student_reservations:
-            student_debt += res.food_price
-        
-        # بدهی به صورت منفی ذخیره می‌شود
-        student.credit = -student_debt
-        db.session.commit()
-        
-        # بروزرسانی آمار مالی
+        # به‌روزرسانی آمار مالی و بدهی‌ها از طریق تابع مرکزی
+        print("✓ فراخوانی تابع به‌روزرسانی آمار مالی پس از لغو رزرو روزانه")
         update_financial_statistics()
         
         flash(f'{count} رزرو برای روز {days.get(day, day)} با موفقیت لغو شد', 'success')
