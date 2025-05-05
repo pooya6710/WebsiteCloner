@@ -320,16 +320,8 @@ def reserve():
     db.session.add(new_reservation)
     db.session.commit()
     
-    # به‌روزرسانی بدهی دانشجو
-    # محاسبه میزان بدهی دانشجو بر اساس تمام رزروها
-    student_debt = 0
-    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-    for reservation in student_reservations:
-        student_debt += reservation.food_price
-    
-    # بدهی به صورت منفی ذخیره می‌شود
-    student.credit = -student_debt
-    db.session.commit()
+    # به‌روزرسانی بدهی دانشجو و آمار مالی کل سیستم
+    update_financial_statistics()
     
     flash(f'رزرو شما برای {day} وعده {meal} با موفقیت ثبت شد', 'success')
     return redirect(url_for('dashboard'))
@@ -393,6 +385,10 @@ def reserve_all_day():
     
     if success_count > 0:
         db.session.commit()
+        
+        # به‌روزرسانی آمار مالی و بدهی‌ها
+        update_financial_statistics()
+        
         meal_fa = 'وعده' if success_count == 1 else 'وعده'
         flash(f'{success_count} {meal_fa} غذا برای روز {day} با موفقیت رزرو شد', 'success')
     else:
@@ -409,24 +405,40 @@ def cancel_reservation(reservation_id):
     reservation = Reservation.query.get_or_404(reservation_id)
     student = Student.query.filter_by(user_id=str(current_user.id)).first()
     
+    # بررسی دسترسی و وضعیت غذا
     if not student or reservation.student_id != student.id:
         flash('شما مجوز حذف این رزرو را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
-    db.session.delete(reservation)
-    db.session.commit()
+    # بررسی وضعیت تحویل غذا
+    if reservation.delivered == 1:
+        flash('امکان لغو رزرو غذای تحویل شده وجود ندارد', 'danger')
+        return redirect(url_for('dashboard'))
     
-    # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
-    student_debt = 0
-    student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-    for res in student_reservations:
-        student_debt += res.food_price
+    try:
+        # حذف رزرو
+        db.session.delete(reservation)
+        db.session.commit()
+        
+        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
+        student_debt = 0
+        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+        for res in student_reservations:
+            student_debt += res.food_price
+        
+        # بدهی به صورت منفی ذخیره می‌شود
+        student.credit = -student_debt
+        db.session.commit()
+        
+        # بروزرسانی آمار
+        update_financial_statistics()
+        
+        flash('رزرو با موفقیت لغو شد', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in cancel_reservation: {str(e)}")
+        flash('خطا در لغو رزرو، لطفا دوباره تلاش کنید', 'danger')
     
-    # بدهی به صورت منفی ذخیره می‌شود
-    student.credit = -student_debt
-    db.session.commit()
-    
-    flash('رزرو با موفقیت لغو شد', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/admin')
@@ -714,6 +726,38 @@ def admin_update_menu():
     
     return redirect(url_for('admin_menu'))
 
+# تابع بروزرسانی کامل آمار مالی و بدهی
+def update_financial_statistics():
+    """
+    بروزرسانی کامل آمار مالی و بدهی‌های تمام دانشجویان
+    این تابع در نقاط کلیدی سیستم فراخوانی می‌شود:
+    - ثبت رزرو جدید
+    - لغو رزرو
+    - تایید تحویل غذا
+    - بازدید از پنل‌های مدیریت و گزارش‌ها
+    """
+    try:
+        # محاسبه بدهی همه دانشجویان
+        students = Student.query.all()
+        for student in students:
+            # محاسبه بدهی کل برای هر دانشجو
+            student_debt = 0
+            student_reservations = Reservation.query.filter_by(student_id=student.id).all()
+            for res in student_reservations:
+                student_debt += res.food_price
+                
+            # بدهی به صورت منفی ذخیره می‌شود
+            student.credit = -student_debt
+        
+        # ذخیره تغییرات
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"خطا در بروزرسانی آمار مالی: {e}")
+        return False
+
+
 @app.route('/admin/delivery/<int:reservation_id>', methods=['POST'])
 @login_required
 def admin_delivery(reservation_id):
@@ -721,24 +765,32 @@ def admin_delivery(reservation_id):
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
-    reservation = Reservation.query.get_or_404(reservation_id)
-    reservation.delivered = 1  # تنظیم وضعیت تحویل به "تحویل شده"
-    
-    # به‌روزرسانی بدهی دانشجو پس از تأیید تحویل
-    student = Student.query.get(reservation.student_id)
-    if student:
-        student_debt = 0
-        student_reservations = Reservation.query.filter_by(student_id=student.id).all()
-        for res in student_reservations:
-            student_debt += res.food_price
+    try:
+        reservation = Reservation.query.get_or_404(reservation_id)
         
-        # بدهی به صورت منفی ذخیره می‌شود
-        student.credit = -student_debt
+        # بررسی وضعیت فعلی
+        if reservation.delivered == 1:
+            flash('این غذا قبلا تحویل داده شده است', 'warning')
+            return redirect(request.referrer or url_for('admin_reservations'))
+        
+        # تنظیم وضعیت تحویل به "تحویل شده"
+        reservation.delivered = 1
+        db.session.commit()
+        
+        # بروزرسانی بدهی و آمار مالی کل سیستم
+        if update_financial_statistics():
+            flash('وضعیت تحویل غذا با موفقیت به‌روزرسانی شد', 'success')
+        else:
+            flash('وضعیت تحویل بروز شد، اما در بروزرسانی آمار مالی مشکلی پیش آمد', 'warning')
+            
+        # بازگشت به صفحه قبلی (اگر ممکن باشد)
+        return redirect(request.referrer or url_for('admin_reservations'))
     
-    db.session.commit()
-    
-    flash('وضعیت تحویل غذا با موفقیت به‌روزرسانی شد', 'success')
-    return redirect(url_for('admin_reservations'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"خطا در تأیید تحویل غذا: {e}")
+        flash('خطا در تأیید تحویل غذا، لطفا دوباره تلاش کنید', 'danger')
+        return redirect(url_for('admin_reservations'))
 
 @app.route('/reserve_all_week', methods=['POST'])
 @login_required
@@ -857,6 +909,9 @@ def settings():
         flash('خطا در سیستم رخ داده است. لطفا دوباره تلاش کنید.', 'danger')
         return redirect(url_for('dashboard'))
 
+# این تابع در بالا تعریف شده است
+
+
 @app.route('/cancel_all_day', methods=['POST'])
 @login_required
 def cancel_all_day():
@@ -885,9 +940,9 @@ def cancel_all_day():
     ])
     
     try:
-        # دریافت رزروهای روز مورد نظر - تمام رزرو ها، نه فقط آنهایی که تحویل نشده‌اند
+        # دریافت رزروهای روز مورد نظر - فقط رزروهایی که تحویل نشده‌اند
         reservations = Reservation.query.filter_by(
-            student_id=student.id, day=day
+            student_id=student.id, day=day, delivered=0
         ).all()
         
         if not reservations:
@@ -912,6 +967,9 @@ def cancel_all_day():
         student.credit = -student_debt
         db.session.commit()
         
+        # بروزرسانی آمار مالی
+        update_financial_statistics()
+        
         flash(f'{count} رزرو برای روز {days.get(day, day)} با موفقیت لغو شد', 'success')
         return redirect(url_for('dashboard'))
     
@@ -931,13 +989,13 @@ def cancel_all_week():
         return redirect(url_for('dashboard'))
     
     try:
-        # دریافت همه رزروها، نه فقط آنهایی که تحویل نشده‌اند
+        # دریافت فقط رزروهایی که تحویل نشده‌اند
         reservations = Reservation.query.filter_by(
-            student_id=student.id
+            student_id=student.id, delivered=0
         ).all()
         
         if not reservations:
-            flash('شما هیچ رزروی ندارید', 'warning')
+            flash('شما هیچ رزروی قابل لغو ندارید', 'warning')
             return redirect(url_for('dashboard'))
         
         # حذف رزروها
@@ -948,9 +1006,8 @@ def cancel_all_week():
         
         db.session.commit()
         
-        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو - باید صفر باشد چون همه رزروها حذف شدند
-        student.credit = 0  # بدهی صفر می‌شود
-        db.session.commit()
+        # به‌روزرسانی بدهی دانشجو پس از حذف رزرو
+        update_financial_statistics()
         
         flash(f'{count} رزرو برای کل هفته با موفقیت لغو شد', 'success')
         return redirect(url_for('dashboard'))
