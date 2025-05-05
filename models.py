@@ -35,6 +35,7 @@ class Student(db.Model):
     user_id = Column(String(50), unique=True, nullable=False)  # ارتباط با کاربر
     feeding_code = Column(String(20), unique=True, nullable=False)  # کد تغذیه دانشجویی
     credit = Column(Float, default=0.0)  # اعتبار حساب دانشجو (به تومان)
+    debt = Column(Float, default=0.0)  # بدهی دانشجو (به تومان)
     
     # ارتباط با رزروها
     reservations = relationship("Reservation", back_populates="student", cascade="all, delete-orphan")

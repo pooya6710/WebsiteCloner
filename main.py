@@ -767,24 +767,37 @@ def update_financial_statistics():
         
         # ریست کردن بدهی همه دانشجویان برای اطمینان از به‌روزرسانی صحیح
         for student in students:
-            student.credit = 0
+            # ریست مقدار بدهی
+            student.debt = 0
+            # اعتبار حساب همچنان حفظ می‌شود
+            # student.credit = 0
         db.session.flush()
         
         for student in students:
-            # محاسبه بدهی کل برای هر دانشجو
+            # محاسبه بدهی کل برای هر دانشجو - فقط غذاهای تحویل شده
             student_debt = 0
-            # فقط رزروهای تحویل نشده در بدهی حساب می‌شوند
-            student_reservations = Reservation.query.filter_by(student_id=student.id, delivered=0).all()
+            # غذاهای تحویل شده برای محاسبه بدهی
+            delivered_reservations = Reservation.query.filter_by(student_id=student.id, delivered=1).all()
             
-            print(f"✓ دانشجو: {student.feeding_code}, تعداد رزروهای تحویل نشده: {len(student_reservations)}")
-            
-            for res in student_reservations:
+            for res in delivered_reservations:
                 student_debt += res.food_price
+            
+            # محاسبه بدهی برای غذاهای تحویل نشده (به منظور نمایش در داشبورد)
+            pending_debt = 0
+            pending_reservations = Reservation.query.filter_by(student_id=student.id, delivered=0).all()
+            
+            print(f"✓ دانشجو: {student.feeding_code}, تعداد رزروهای تحویل نشده: {len(pending_reservations)}")
+            
+            for res in pending_reservations:
+                pending_debt += res.food_price
                 print(f"   - رزرو: {res.day}, {res.meal}, قیمت: {res.food_price} تومان")
-                
-            # بدهی به صورت منفی ذخیره می‌شود
-            student.credit = -student_debt
-            print(f"✓ بدهی نهایی دانشجو {student.feeding_code}: {-student.credit} تومان")
+            
+            # ذخیره‌سازی بدهی در فیلد debt 
+            student.debt = student_debt
+            print(f"✓ بدهی نهایی دانشجو {student.feeding_code} برای غذاهای تحویل شده: {student.debt} تومان")
+            print(f"✓ هزینه‌های آتی دانشجو {student.feeding_code} برای غذاهای رزرو شده: {pending_debt} تومان")
+            
+            # نمایش کل بدهی و هزینه‌های پیش‌رو در داشبورد به صورت جداگانه
         
         # ذخیره تغییرات و اطمینان از commit شدن آنها
         db.session.commit()
@@ -793,8 +806,8 @@ def update_financial_statistics():
         # تأیید به‌روزرسانی موفق
         updated_students = Student.query.all()
         for student in updated_students:
-            if student.credit != 0:
-                print(f"→ تأیید به‌روزرسانی: دانشجو {student.feeding_code} با بدهی {-student.credit} تومان")
+            if student.debt > 0:
+                print(f"→ تأیید به‌روزرسانی: دانشجو {student.feeding_code} با بدهی {student.debt} تومان")
         
         return True
     except Exception as e:

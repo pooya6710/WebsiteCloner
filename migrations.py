@@ -16,6 +16,15 @@ def migrate_database():
             db.session.rollback()
             print(f"خطا در اضافه کردن ستون food_price: {str(e)}")
         
+        # بررسی و اضافه کردن ستون بدهی به جدول دانشجویان
+        try:
+            db.session.execute(db.text("ALTER TABLE students ADD COLUMN IF NOT EXISTS debt FLOAT DEFAULT 0.0"))
+            db.session.commit()
+            print("ستون debt با موفقیت به جدول students اضافه شد.")
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطا در اضافه کردن ستون debt: {str(e)}")
+        
         # ایجاد جدول‌های جدید
         try:
             # اطمینان از به روز بودن ساختار پایگاه داده
