@@ -246,23 +246,52 @@ def dashboard():
 def menu():
     # دریافت منوی هفتگی
     weekly_menu = Menu.query.all()
-    # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
-    days = OrderedDict([
-        ("saturday", "شنبه"),
-        ("sunday", "یکشنبه"),
-        ("monday", "دوشنبه"),
-        ("tuesday", "سه‌شنبه"),
-        ("wednesday", "چهارشنبه"),
-        ("thursday", "پنج‌شنبه"),
-        ("friday", "جمعه")
-    ])
+    
+    # محاسبه تاریخ‌های شمسی هفته جاری
+    today = datetime.datetime.now()
+    current_jalali_date = jdatetime.date.fromgregorian(date=today.date())
+    
+    # محاسبه شنبه این هفته (روز اول هفته)
+    # در تقویم شمسی، شنبه روز اول هفته (۰) است
+    current_weekday = current_jalali_date.weekday()
+    days_to_saturday = current_weekday  # تعداد روزهایی که باید به عقب برگردیم تا به شنبه برسیم
+    
+    saturday_date = current_jalali_date - jdatetime.timedelta(days=days_to_saturday)
+    
+    # ایجاد دیکشنری روزهای هفته همراه با تاریخ
+    week_dates = {}
+    days_persian = {
+        "saturday": "شنبه",
+        "sunday": "یکشنبه",
+        "monday": "دوشنبه",
+        "tuesday": "سه‌شنبه",
+        "wednesday": "چهارشنبه",
+        "thursday": "پنج‌شنبه",
+        "friday": "جمعه"
+    }
+    
+    day_keys = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
+    
+    # ایجاد دیکشنری منظم از روزهای هفته با تاریخ شمسی
+    days = OrderedDict()
+    for i, day_key in enumerate(day_keys):
+        current_date = saturday_date + jdatetime.timedelta(days=i)
+        formatted_date = f"{current_date.year}/{current_date.month}/{current_date.day}"
+        days[day_key] = f"{days_persian[day_key]} ({formatted_date})"
+    
     meals = {
         "breakfast": "صبحانه",
         "lunch": "ناهار",
         "dinner": "شام"
     }
     
-    return render_template('menu.html', weekly_menu=weekly_menu, days=days, meals=meals)
+    # ذخیره تاریخ‌های شمسی به صورت جداگانه برای استفاده در فرم‌ها
+    day_dates = {}
+    for i, day_key in enumerate(day_keys):
+        current_date = saturday_date + jdatetime.timedelta(days=i)
+        day_dates[day_key] = current_date.strftime("%Y/%m/%d")
+    
+    return render_template('menu.html', weekly_menu=weekly_menu, days=days, day_dates=day_dates, meals=meals)
 
 @app.route('/reserve', methods=['POST'])
 @login_required
@@ -492,8 +521,19 @@ def admin_students():
     # به‌روزرسانی بدهی همه دانشجویان قبل از نمایش لیست با استفاده از تابع مرکزی
     update_financial_statistics()
     
+    # دریافت پارامتر جستجو
+    search_code = request.args.get('search_code')
+    
     # بازخوانی لیست دانشجویان پس از به‌روزرسانی
-    students = Student.query.all()
+    if search_code:
+        # اگر کد تغذیه برای جستجو وارد شده باشد
+        students = Student.query.filter(Student.feeding_code.like(f'%{search_code}%')).all()
+        if not students:
+            flash(f'دانشجویی با کد تغذیه مشابه {search_code} یافت نشد.', 'warning')
+    else:
+        # نمایش همه دانشجویان اگر جستجو نباشد
+        students = Student.query.all()
+    
     return render_template('admin_students.html', students=students)
 
 @app.route('/admin/reservations')

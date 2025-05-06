@@ -129,7 +129,7 @@ a:hover {
 }
 
 .dropdown-menu {
-    z-index: 1050;
+    z-index: 9999 !important; /* افزایش z-index به مقدار بالاتر */
     background-color: var(--primary-dark);
     border: 1px solid var(--secondary-color);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -148,14 +148,43 @@ a:hover {
 /* حل مشکل منوهای کشویی که پشت سایر عناصر قرار می‌گیرند */
 .navbar .dropdown-menu {
     margin-top: 0;
+    position: absolute !important;
+}
+
+/* اطمینان از نمایش مناسب منوهای کشویی */
+.dropdown-menu.show {
+    display: block !important;
+    opacity: 1 !important; 
+    visibility: visible !important;
+    transform: none !important;
 }
 
 .modal-backdrop {
-    z-index: 1040;
+    z-index: 8000;
 }
 
 .modal {
-    z-index: 1045;
+    z-index: 9000;
+}
+
+/* بهبود نمایش مودال‌ها */
+.modal-content {
+    background-color: var(--transparent-bg);
+    border: 2px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    color: var(--light-color);
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
 }
 
 /* دکمه‌ها */

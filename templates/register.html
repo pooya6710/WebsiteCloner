@@ -312,7 +312,12 @@
             // نمایش نتیجه
             passwordStrength.style.width = strength + '%';
             passwordStrength.style.backgroundColor = color;
-            strengthText.textContent = 'قدرت رمز عبور: ' + status;
+            
+            if (password && password.trim() !== '') {
+                strengthText.textContent = 'قدرت رمز عبور: ' + status;
+            } else {
+                strengthText.textContent = 'قدرت رمز عبور: وارد نشده';
+            }
             strengthText.style.color = color;
         });
         
