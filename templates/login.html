@@ -23,26 +23,28 @@
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        border-right: 2px solid #e8b835;
+        border-right: 2px solid var(--secondary-color);
     }
     
     .auth-image h2 {
         font-size: 2rem;
         font-weight: bold;
         margin-bottom: 1.5rem;
-        background: linear-gradient(90deg, #3498db, #2ecc71);
+        background: linear-gradient(90deg, var(--secondary-color), var(--secondary-light));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         display: inline-block;
     }
     
     .auth-form {
-        background-color: var(--bs-body-bg);
-        color: var(--bs-body-color);
+        background-color: var(--transparent-bg);
+        color: var(--light-color);
         border-radius: 10px 0 0 10px;
         padding: 3rem 2rem;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        border-left: 2px solid var(--bs-info);
+        box-shadow: var(--card-shadow);
+        border-left: 2px solid var(--primary-color);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
     
     @media (max-width: 768px) {
