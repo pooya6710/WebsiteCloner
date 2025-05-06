@@ -136,7 +136,7 @@
                                         </td>
                                         <td>{{ reservation.food_name }}</td>
                                         <td>{{ "{:,.0f}".format(reservation.food_price) }}</td>
-                                        <td>{{ reservation.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ gregorian_to_jalali_datetime(reservation.timestamp).strftime('%Y/%m/%d %H:%M') }}</td>
                                         <td>
                                             {% if reservation.delivered == 1 %}
                                             <span class="badge bg-success">تحویل شده</span>

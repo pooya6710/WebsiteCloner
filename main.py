@@ -548,7 +548,8 @@ def admin_reservations():
                           meal_mapping=meal_mapping,
                           feeding_code=feeding_code,
                           day_filter=day_filter,
-                          meal_filter=meal_filter)
+                          meal_filter=meal_filter,
+                          gregorian_to_jalali_datetime=gregorian_to_jalali_datetime)
 
 @app.route('/admin/student/<int:student_id>/reservations')
 @login_required
@@ -565,7 +566,8 @@ def admin_student_reservations(student_id):
     
     return render_template('admin_student_reservations.html', 
                            student=student, 
-                           reservations=reservations)
+                           reservations=reservations,
+                           gregorian_to_jalali_datetime=gregorian_to_jalali_datetime)
 
 @app.route('/admin/menu')
 @login_required
