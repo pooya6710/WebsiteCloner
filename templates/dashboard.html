@@ -170,17 +170,17 @@
             <div class="col-md-3 col-sm-6 mb-3">
                 <div class="dashboard-stats">
                     <div class="text-center">
-                        <i class="bi bi-calendar-check stat-icon"></i>
+                        <i class="bi bi-check-circle-fill stat-icon"></i>
                         <h3 class="stat-value">
-                            {% set upcoming_count = 0 %}
+                            {% set delivered_count = 0 %}
                             {% for reservation in reservations %}
-                                {% if reservation.delivered == 0 %}
-                                    {% set upcoming_count = upcoming_count + 1 %}
+                                {% if reservation.delivered == 1 %}
+                                    {% set delivered_count = delivered_count + 1 %}
                                 {% endif %}
                             {% endfor %}
-                            {{ upcoming_count }}
+                            {{ delivered_count }}
                         </h3>
-                        <p class="stat-label">غذاهای آینده</p>
+                        <p class="stat-label">تحویل شده</p>
                     </div>
                 </div>
             </div>

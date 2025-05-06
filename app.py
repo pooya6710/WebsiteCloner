@@ -128,17 +128,31 @@ def rate_limit():
         # برای درخواست‌های CORS رعایت می‌کنیم
         return None
     
-    # دریافت آدرس IP کلاینت
-    client_ip = request.remote_addr
+    # دریافت آدرس IP کلاینت با پشتیبانی از هدرهای پراکسی
+    client_ip = request.headers.get('X-Real-IP') or request.headers.get('X-Forwarded-For') or request.remote_addr
+    if ',' in client_ip:  # اگر چندین IP در X-Forwarded-For وجود داشته باشد
+        client_ip = client_ip.split(',')[0].strip()
+        
     current_time = time.time()
     path = request.path
     
-    # بررسی اینکه مسیر حساس است یا خیر
-    sensitive_paths = ['/admin', '/api/', '/login', '/register', '/logout', '/settings', '/admin_']
+    # بررسی اینکه مسیر حساس است یا خیر - افزایش مسیرهای حساس
+    sensitive_paths = [
+        '/admin', '/api/', '/login', '/register', '/logout', '/settings', 
+        '/admin_', '/dashboard', '/menu', '/reserve', '/cancel_', '/password_reset'
+    ]
     is_sensitive_path = any(p in path for p in sensitive_paths)
     
+    # محدودیت شدیدتر برای صفحات مدیریتی
+    is_admin_path = '/admin' in path
+    
     # انتخاب محدودیت مناسب بر اساس نوع مسیر
-    limit = api_rate_limit_count if is_sensitive_path else rate_limit_count
+    if is_admin_path:
+        limit = 30  # محدودیت ویژه برای مسیرهای مدیریتی
+    elif is_sensitive_path:
+        limit = api_rate_limit_count  # محدودیت برای API‌ها و مسیرهای حساس
+    else:
+        limit = rate_limit_count  # محدودیت عمومی
     
     # بررسی رکوردهای منقضی شده و پاکسازی آنها
     for ip in list(rate_limits.keys()):
@@ -184,7 +198,11 @@ def rate_limit():
 @app.before_request
 def log_suspicious_requests():
     # لیست مسیرهای حساس که باید همیشه ثبت شوند
-    sensitive_paths = ['/admin', '/api/', '/logout', '/settings', '/admin_']
+    sensitive_paths = [
+        '/admin', '/api/', '/logout', '/settings', '/admin_', 
+        '/login', '/register', '/dashboard', '/menu', '/reserve',
+        '/password_reset', '/cancel_', '/student_'
+    ]
     
     # لیست پسوندهای مشکوک که ممکن است نشاندهنده حمله باشند
     suspicious_extensions = ['.php', '.asp', '.aspx', '.jsp', '.cgi', '.env', '.git', '.sql']

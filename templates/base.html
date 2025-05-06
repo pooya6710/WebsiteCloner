@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="سامانه هوشمند رزرو غذای دانشگاه - دسترسی آسان، امنیت بالا و تجربه کاربری عالی">
+    <meta name="keywords" content="رزرو غذا، سامانه تغذیه، دانشگاه، سلف سرویس، مدیریت رزرو">
+    <meta name="author" content="سامانه رزرو غذای دانشگاه">
+    <meta name="theme-color" content="#4e54c8">
+    <!-- تنظیمات امنیتی CSP برای جلوگیری از حملات XSS -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.replit.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:;">
     <title>{% block title %}سامانه رزرو غذای دانشگاه{% endblock %}</title>
     <!-- فونت وزیر متن -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
@@ -12,11 +18,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- استایل‌های سفارشی -->
     <link rel="stylesheet" href="/static/css/style.css">
+    <!-- اسکریپت‌های مرورگر -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- نوار ناوبری - با استایل Replit -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-bs-theme="dark">
+    <!-- نوار ناوبری جدید با طراحی مدرن -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));" data-bs-theme="dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 <i class="bi bi-cup-hot-fill me-2 text-warning"></i>سامانه رزرو غذای دانشگاه
