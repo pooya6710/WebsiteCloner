@@ -32,10 +32,12 @@ def gregorian_to_jalali(date_obj):
 
 # تابع تبدیل تاریخ و زمان میلادی به شمسی
 def gregorian_to_jalali_datetime(datetime_obj):
-    """تبدیل تاریخ و زمان میلادی به شمسی"""
+    """تبدیل تاریخ و زمان میلادی به شمسی با تنظیم ساعت به وقت ایران"""
     if datetime_obj is None:
         return None
-    return jdatetime.datetime.fromgregorian(datetime=datetime_obj)
+    # اضافه کردن 3.5 ساعت (210 دقیقه) به زمان UTC برای تبدیل به وقت ایران
+    iran_time = datetime_obj + datetime.timedelta(minutes=210)
+    return jdatetime.datetime.fromgregorian(datetime=iran_time)
 
 @login_manager.user_loader
 def load_user(user_id):

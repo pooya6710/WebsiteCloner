@@ -119,7 +119,7 @@
                                                         <div>
                                                             <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
                                                             <small class="d-block text-muted">
-                                                                <strong>{% if food is mapping and food.price %}{{ food.price|int }}{% else %}2000{% endif %} تومان</strong>
+                                                                <strong>2000 تومان</strong>
                                                             </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
@@ -155,7 +155,7 @@
                                                         <div>
                                                             <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
                                                             <small class="d-block text-muted">
-                                                                <strong>{% if food is mapping and food.price %}{{ food.price|int }}{% else %}3000{% endif %} تومان</strong>
+                                                                <strong>3000 تومان</strong>
                                                             </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
@@ -191,7 +191,7 @@
                                                         <div>
                                                             <span>{% if food is mapping %}{{ food.name }}{% else %}{{ food }}{% endif %}</span>
                                                             <small class="d-block text-muted">
-                                                                <strong>{% if food is mapping and food.price %}{{ food.price|int }}{% else %}5000{% endif %} تومان</strong>
+                                                                <strong>5000 تومان</strong>
                                                             </small>
                                                         </div>
                                                         <form action="{{ url_for('reserve') }}" method="POST">
