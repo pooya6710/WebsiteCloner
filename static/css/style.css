@@ -105,7 +105,7 @@ a:hover {
     border-bottom: 2px solid var(--secondary-color);
     margin-bottom: 0;
     position: relative;
-    z-index: 1000;
+    z-index: 1030;
 }
 
 .navbar-brand {
@@ -129,10 +129,11 @@ a:hover {
 }
 
 .dropdown-menu {
-    z-index: 1001;
+    z-index: 1050;
     background-color: var(--primary-dark);
     border: 1px solid var(--secondary-color);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: absolute;
 }
 
 .dropdown-item {
@@ -142,6 +143,19 @@ a:hover {
 .dropdown-item:hover, .dropdown-item:focus {
     background-color: var(--primary-color);
     color: var(--secondary-color);
+}
+
+/* حل مشکل منوهای کشویی که پشت سایر عناصر قرار می‌گیرند */
+.navbar .dropdown-menu {
+    margin-top: 0;
+}
+
+.modal-backdrop {
+    z-index: 1040;
+}
+
+.modal {
+    z-index: 1045;
 }
 
 /* دکمه‌ها */

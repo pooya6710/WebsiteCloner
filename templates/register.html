@@ -266,9 +266,10 @@
             let status = '';
             let color = '';
             
-            if (password.length === 0) {
+            if (!password || password.trim() === '') {
                 status = 'وارد نشده';
                 color = '#e9ecef';
+                strength = 0;
             } else if (password.length < 6) {
                 status = 'ضعیف';
                 color = '#dc3545';
@@ -314,6 +315,9 @@
             strengthText.textContent = 'قدرت رمز عبور: ' + status;
             strengthText.style.color = color;
         });
+        
+        // فراخوانی اولیه برای اطمینان از نمایش صحیح
+        passwordInput.dispatchEvent(new Event('input'));
         
         // بررسی تطابق رمز عبور
         confirmPasswordInput.addEventListener('input', function() {

@@ -459,13 +459,28 @@ def admin():
     # محاسبه کل هزینه غذاهای منتظر تحویل
     total_pending_price = db.session.query(db.func.sum(Reservation.food_price)).filter_by(delivered=0).scalar() or 0
     
+    # آمار وعده‌های غذایی
+    breakfast_count = Reservation.query.filter_by(meal='breakfast').count()
+    lunch_count = Reservation.query.filter_by(meal='lunch').count()
+    dinner_count = Reservation.query.filter_by(meal='dinner').count()
+    total_count = breakfast_count + lunch_count + dinner_count
+    
+    # ساخت آمار
+    stats = {
+        'breakfast': breakfast_count,
+        'lunch': lunch_count,
+        'dinner': dinner_count,
+        'total': total_count
+    }
+    
     return render_template('admin.html', 
                            student_count=student_count,
                            reservation_count=reservation_count,
                            delivered_count=delivered_count,
                            pending_count=pending_count,
                            total_delivered_price=total_delivered_price,
-                           total_pending_price=total_pending_price)
+                           total_pending_price=total_pending_price,
+                           stats=stats)
 
 @app.route('/admin/students')
 @login_required
