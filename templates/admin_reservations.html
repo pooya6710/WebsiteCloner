@@ -107,13 +107,16 @@
             </div>
         </div>
         
-        <!-- خلاصه آمار -->
+        <!-- خلاصه آمار و بدهی‌های دانشجویان -->
         <div class="row mb-4">
             <div class="col-md-12">
                 <div class="card bg-dark">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0"><i class="bi bi-cash-stack me-2"></i>گزارش بدهی دانشجویان</h3>
+                    </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="col-md-4 mb-3 mb-md-0">
                                 <div class="card text-bg-primary">
                                     <div class="card-body text-center py-3">
                                         <h5 class="card-title"><i class="bi bi-list-check"></i> تعداد کل رزروها</h5>
@@ -122,20 +125,7 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card text-bg-success">
-                                    <div class="card-body text-center py-3">
-                                        <h5 class="card-title"><i class="bi bi-cash-coin"></i> مجموع مبالغ</h5>
-                                        {% set total_price = 0 %}
-                                        {% for reservation in reservations %}
-                                            {% set total_price = total_price + reservation.food_price %}
-                                        {% endfor %}
-                                        <p class="display-6 mb-0">{{ "{:,.0f}".format(total_price) }} <small>تومان</small></p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="col-md-4 mb-3 mb-md-0">
                                 <div class="card text-bg-info">
                                     <div class="card-body text-center py-3">
                                         <h5 class="card-title"><i class="bi bi-check-circle"></i> تحویل شده</h5>
@@ -150,7 +140,7 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="col-md-4 mb-3 mb-md-0">
                                 <div class="card text-bg-warning">
                                     <div class="card-body text-center py-3">
                                         <h5 class="card-title"><i class="bi bi-hourglass-split"></i> منتظر تحویل</h5>
@@ -161,6 +151,57 @@
                                             {% endif %}
                                         {% endfor %}
                                         <p class="display-6 mb-0">{{ pending_count }} <small>عدد</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- جدول بدهی دانشجویان -->
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header bg-danger text-white">
+                                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>لیست بدهی‌های دانشجویان (فقط غذاهای تحویل شده)</h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover mb-0">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th scope="col">کد تغذیه</th>
+                                                        <th scope="col">تعداد غذای تحویل شده</th>
+                                                        <th scope="col">بدهی (تومان)</th>
+                                                        <th scope="col">عملیات</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for student in students %}
+                                                    <tr>
+                                                        <td>
+                                                            <a href="{{ url_for('admin_student_reservations', student_id=student.id) }}" class="link-primary text-decoration-none">
+                                                                <i class="bi bi-person-badge"></i> {{ student.feeding_code }}
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            {% set delivered_count = 0 %}
+                                                            {% for reservation in student.reservations %}
+                                                                {% if reservation.delivered == 1 %}
+                                                                    {% set delivered_count = delivered_count + 1 %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            {{ delivered_count }} عدد
+                                                        </td>
+                                                        <td class="fs-5 fw-bold text-danger">{{ "{:,.0f}".format(student.debt) }} تومان</td>
+                                                        <td>
+                                                            <a href="{{ url_for('admin_student_reservations', student_id=student.id) }}" class="btn btn-sm btn-primary">
+                                                                <i class="bi bi-eye"></i> مشاهده جزئیات
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

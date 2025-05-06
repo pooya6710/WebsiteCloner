@@ -363,7 +363,16 @@ def reserve_all_day():
             # انتخاب اولین غذای هر وعده
             food_item = meal_data[meal][0]
             food_name = food_item.get('name', food_item) if isinstance(food_item, dict) else food_item
-            food_price = food_item.get('price', 0) if isinstance(food_item, dict) else 0
+            
+            # تنظیم قیمت‌های ثابت بر اساس نوع وعده
+            if meal == 'breakfast':
+                food_price = 2000.0  # صبحانه
+            elif meal == 'lunch':
+                food_price = 3000.0  # ناهار
+            elif meal == 'dinner':
+                food_price = 5000.0  # شام
+            else:
+                food_price = 0.0
             
             # ایجاد رزرو جدید
             new_reservation = Reservation(
@@ -478,14 +487,15 @@ def admin_reservations():
         return redirect(url_for('dashboard'))
     
     # به‌روزرسانی بدهی همه دانشجویان و آمار مالی قبل از نمایش
-    update_financial_statistics()
+    update_financial_statistics()  # به‌روزرسانی آمار مالی دانشجویان
+    update_reservation_prices()    # به‌روزرسانی قیمت‌های غذاها
     
     # دریافت پارامترهای فیلتر
     feeding_code = request.args.get('feeding_code')
     day_filter = request.args.get('day')
     meal_filter = request.args.get('meal')
     
-    # پایه کوئری
+    # پایه کوئری رزروها
     query = db.session.query(Reservation).join(Student)
     
     # اعمال فیلترها
@@ -498,8 +508,16 @@ def admin_reservations():
     if meal_filter:
         query = query.filter(Reservation.meal == meal_filter)
     
-    # مرتب‌سازی نتایج
+    # مرتب‌سازی نتایج رزروها
     reservations = query.order_by(Reservation.day, Reservation.meal).all()
+    
+    # دریافت لیست تمام دانشجویان برای نمایش بدهی‌ها
+    students = Student.query.all()
+    
+    # اطمینان از به‌روز بودن مقادیر بدهی دانشجویان
+    for student in students:
+        # چاپ لاگ برای اطمینان از به‌روزرسانی
+        print(f"→ تأیید به‌روزرسانی: دانشجو {student.feeding_code} با بدهی {student.debt} تومان")
     
     # ترجمه نام روزها و وعده‌ها
     day_mapping = {
@@ -524,6 +542,7 @@ def admin_reservations():
     # ارسال تمام داده‌های مورد نیاز به قالب
     return render_template('admin_reservations.html', 
                           reservations=reservations,
+                          students=students,  # اضافه کردن لیست دانشجویان برای نمایش بدهی
                           days=days,
                           day_mapping=day_mapping,
                           meal_mapping=meal_mapping,

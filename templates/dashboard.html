@@ -172,15 +172,15 @@
                     <div class="text-center">
                         <i class="bi bi-calendar-check stat-icon"></i>
                         <h3 class="stat-value">
-                            {% set upcoming_cost = 0 %}
+                            {% set upcoming_count = 0 %}
                             {% for reservation in reservations %}
                                 {% if reservation.delivered == 0 %}
-                                    {% set upcoming_cost = upcoming_cost + reservation.food_price %}
+                                    {% set upcoming_count = upcoming_count + 1 %}
                                 {% endif %}
                             {% endfor %}
-                            {{ upcoming_cost|int }}
+                            {{ upcoming_count }}
                         </h3>
-                        <p class="stat-label">هزینه رزروها (تومان)</p>
+                        <p class="stat-label">غذاهای آینده</p>
                     </div>
                 </div>
             </div>
