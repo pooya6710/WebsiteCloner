@@ -698,18 +698,26 @@ def admin_update_menu():
         # ایجاد یک کپی عمیق از داده‌ها برای اطمینان از تغییر واقعی
         new_menu_data = copy.deepcopy(current_data)
         
-        # تنظیم به صورت دستی (به جای تخصیص مستقیم)
-        day_menu.meal_data = new_menu_data
-        
-        # یک تغییر مختصر برای اطمینان از تشخیص تغییر توسط SQLAlchemy
-        from sqlalchemy import func
-        from sqlalchemy.sql.expression import text
-        day_menu.id = day_menu.id  # این خط یک "dirty" flag در SQLAlchemy ایجاد می‌کند
-        
-        # کامیت کردن تغییرات به دیتابیس
-        db.session.add(day_menu)  # مطمئن شویم که تغییرات ثبت می‌شوند
-        db.session.commit()
-        print(f"Successfully committed changes to database")
+        # تلاش مستقیم برای ذخیره تغییرات به صورت خام SQL به‌جای ORM
+        try:
+            import json
+            # تبدیل دیکشنری به JSON string
+            meal_data_json = json.dumps(new_menu_data)
+            print(f"Converting to JSON string: {meal_data_json}")
+            
+            # به‌روزرسانی مستقیم از طریق SQL برای اطمینان از اعمال تغییرات
+            from sqlalchemy import text
+            sql = text("UPDATE menu SET meal_data = :meal_data WHERE id = :id")
+            db.session.execute(sql, {"meal_data": meal_data_json, "id": day_menu.id})
+            db.session.commit()
+            print(f"Successfully committed changes directly using SQL")
+        except Exception as e:
+            print(f"Error in direct SQL update: {str(e)}")
+            # روش جایگزین - استفاده از ORM استاندارد
+            day_menu.meal_data = new_menu_data
+            db.session.add(day_menu)
+            db.session.commit()
+            print(f"Fallback: Successfully committed changes using ORM")
         
         # تخلیه کش SQLAlchemy
         db.session.expire_all()
@@ -850,16 +858,32 @@ def admin_delivery(reservation_id):
         return redirect(url_for('dashboard'))
     
     try:
-        reservation = Reservation.query.get_or_404(reservation_id)
-        
-        # بررسی وضعیت فعلی
-        if reservation.delivered == 1:
-            flash('این غذا قبلا تحویل داده شده است', 'warning')
-            return redirect(request.referrer or url_for('admin_reservations'))
-        
-        # تنظیم وضعیت تحویل به "تحویل شده"
-        reservation.delivered = 1
-        db.session.commit()
+        # استفاده از اجرای مستقیم SQL برای اطمینان از اجرای تغییرات
+        try:
+            from sqlalchemy import text
+            sql = text("UPDATE reservations SET delivered = 1 WHERE id = :id")
+            result = db.session.execute(sql, {"id": reservation_id})
+            db.session.commit()
+            print(f"Updated reservation directly with SQL: {result.rowcount} row(s) affected")
+            
+            # اگر هیچ رزروی به‌روز نشد، احتمالا ID نامعتبر است
+            if result.rowcount == 0:
+                flash('رزرو مورد نظر یافت نشد', 'danger')
+                return redirect(request.referrer or url_for('admin_reservations'))
+                
+        except Exception as sql_error:
+            print(f"SQL update error: {str(sql_error)}, falling back to ORM")
+            # راه حل جایگزین در صورت خطا در SQL مستقیم
+            reservation = Reservation.query.get_or_404(reservation_id)
+            
+            # بررسی وضعیت فعلی
+            if reservation.delivered == 1:
+                flash('این غذا قبلا تحویل داده شده است', 'warning')
+                return redirect(request.referrer or url_for('admin_reservations'))
+            
+            # تنظیم وضعیت تحویل به "تحویل شده"
+            reservation.delivered = 1
+            db.session.commit()
         
         # بروزرسانی بدهی و آمار مالی کل سیستم
         if update_financial_statistics():
