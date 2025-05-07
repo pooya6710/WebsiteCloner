@@ -22,6 +22,58 @@
     <!-- اسکریپت‌های مرورگر -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    
+    <!-- استایل‌های داخلی برای حل مشکل منوهای کشویی -->
+    <style>
+        /* اصلاح مشکل منوی کشویی که پشت محتوا قرار می‌گیرد */
+        .dropdown-menu {
+            z-index: 10000000 !important;
+            position: absolute !important;
+            margin-top: 0 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: none !important;
+            background-color: var(--primary-dark);
+            border: 2px solid var(--secondary-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* رفع مشکل عدم نمایش در صفحه اصلی و صفحات دیگر */
+        .navbar {
+            z-index: 100000 !important;
+            position: relative !important;
+        }
+        
+        .modal, .modal-backdrop {
+            z-index: 200000 !important;
+        }
+        
+        .btn-group, .dropdown, .dropdown-center {
+            position: static !important;
+        }
+        
+        /* تغییر رفتار پیش‌فرض منوی بوت‌استرپ */
+        .dropdown-menu:not(.show) {
+            display: none !important;
+        }
+        
+        .dropdown-menu.show {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* اجبار به نمایش در حالت هاور - صرفاً احتیاطی */
+        .dropdown:hover > .dropdown-menu, 
+        .dropend:hover > .dropdown-menu {
+            display: block !important;
+            margin-top: 0 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+    </style>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -184,57 +236,130 @@
     <!-- جاوااسکریپت بوت‌استرپ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- اسکریپت رفع مشکل منوهای کشویی -->
+    <!-- اسکریپت رفع مشکل منوهای کشویی - نسخه کاملاً دستی -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // بهبود عملکرد منوهای کشویی
-            const dropdownToggleList = document.querySelectorAll('.dropdown-toggle');
-            const dropdownMenuList = document.querySelectorAll('.dropdown-menu');
-            
-            // تنظیم z-index برای همه منوهای کشویی
-            dropdownMenuList.forEach(function(menu) {
-                menu.style.zIndex = '10000000';
-                menu.style.position = 'absolute';
-            });
-            
-            // اضافه کردن Event listener برای دکمه‌های منوی کشویی
-            dropdownToggleList.forEach(function(dropdownToggle) {
-                dropdownToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
+            // جایگزینی کامل تغییر وضعیت منوی کشویی بوت‌استرپ
+            function fixDropdowns() {
+                // انتخاب تمام عناصر منوی کشویی
+                const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+                const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+                
+                // تنظیم ویژگی‌های CSS برای تمامی منوها
+                dropdownMenus.forEach(menu => {
+                    // تنظیم مشخصات دائمی
+                    menu.style.position = 'absolute';
+                    menu.style.zIndex = '10000000';
                     
-                    const targetMenu = document.querySelector(dropdownToggle.getAttribute('data-bs-target')) || 
-                                       dropdownToggle.nextElementSibling;
-                    
-                    // بستن سایر منوها
-                    dropdownMenuList.forEach(function(menu) {
-                        if (menu !== targetMenu && menu.classList.contains('show')) {
-                            menu.classList.remove('show');
+                    // در صورتی که منو نمایش داده نمی‌شود
+                    if (!menu.classList.contains('show')) {
+                        menu.style.display = 'none';
+                        menu.style.visibility = 'hidden';
+                    }
+                });
+                
+                // حذف تمام رویدادهای قبلی
+                dropdownToggles.forEach(toggle => {
+                    const originalToggle = toggle.cloneNode(true);
+                    toggle.parentNode.replaceChild(originalToggle, toggle);
+                });
+                
+                // اضافه کردن رویدادهای جدید
+                document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+                    toggle.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        
+                        // منوی مرتبط با این دکمه را پیدا کن
+                        const dropdownMenu = toggle.nextElementSibling;
+                        
+                        // اطمینان از اینکه این عنصر، منوی کشویی است
+                        if (!dropdownMenu || !dropdownMenu.classList.contains('dropdown-menu')) return;
+                        
+                        // بستن تمام منوهای دیگر
+                        dropdownMenus.forEach(menu => {
+                            if (menu !== dropdownMenu && menu.classList.contains('show')) {
+                                menu.classList.remove('show');
+                                menu.style.display = 'none';
+                                menu.style.visibility = 'hidden';
+                                
+                                // غیرفعال کردن ظاهر toggle فعال
+                                const parentToggle = menu.previousElementSibling;
+                                if (parentToggle && parentToggle.classList.contains('dropdown-toggle')) {
+                                    parentToggle.setAttribute('aria-expanded', 'false');
+                                }
+                            }
+                        });
+                        
+                        // تغییر وضعیت این منو
+                        const isShown = dropdownMenu.classList.contains('show');
+                        
+                        if (isShown) {
+                            // بستن منو
+                            dropdownMenu.classList.remove('show');
+                            dropdownMenu.style.display = 'none';
+                            dropdownMenu.style.visibility = 'hidden';
+                            toggle.setAttribute('aria-expanded', 'false');
+                        } else {
+                            // باز کردن منو
+                            dropdownMenu.classList.add('show');
+                            dropdownMenu.style.display = 'block';
+                            dropdownMenu.style.visibility = 'visible';
+                            dropdownMenu.style.opacity = '1';
+                            dropdownMenu.style.pointerEvents = 'auto';
+                            toggle.setAttribute('aria-expanded', 'true');
+                            
+                            // تنظیم موقعیت منو
+                            const rect = toggle.getBoundingClientRect();
+                            const isDropEnd = toggle.parentElement.classList.contains('dropend');
+                            
+                            if (isDropEnd) {
+                                // منوی کشویی افقی
+                                dropdownMenu.style.top = rect.top + 'px';
+                                dropdownMenu.style.left = (rect.left + rect.width) + 'px';
+                            } else {
+                                // منوی کشویی عمودی معمولی
+                                dropdownMenu.style.top = (rect.top + rect.height) + 'px';
+                                
+                                if (dropdownMenu.classList.contains('dropdown-menu-end')) {
+                                    dropdownMenu.style.left = 'auto';
+                                    dropdownMenu.style.right = '0px';
+                                } else {
+                                    dropdownMenu.style.left = rect.left + 'px';
+                                    dropdownMenu.style.right = 'auto';
+                                }
+                            }
                         }
                     });
-                    
-                    // باز یا بسته کردن منوی هدف
-                    if (targetMenu) {
-                        targetMenu.classList.toggle('show');
-                        
-                        // تنظیم style به صورت مستقیم
-                        if (targetMenu.classList.contains('show')) {
-                            targetMenu.style.display = 'block';
-                            targetMenu.style.visibility = 'visible';
-                            targetMenu.style.opacity = '1';
-                            targetMenu.style.pointerEvents = 'auto';
+                });
+                
+                // بستن منوها با کلیک خارج
+                document.addEventListener('click', function(event) {
+                    dropdownMenus.forEach(menu => {
+                        if (menu.classList.contains('show')) {
+                            // اگر کلیک بیرون از منو باشد
+                            if (!menu.contains(event.target) && !event.target.classList.contains('dropdown-toggle')) {
+                                menu.classList.remove('show');
+                                menu.style.display = 'none';
+                                menu.style.visibility = 'hidden';
+                                
+                                // غیرفعال کردن ظاهر toggle فعال
+                                const parentToggle = menu.previousElementSibling;
+                                if (parentToggle && parentToggle.classList.contains('dropdown-toggle')) {
+                                    parentToggle.setAttribute('aria-expanded', 'false');
+                                }
+                            }
                         }
-                    }
+                    });
                 });
-            });
+            }
             
-            // بستن منو با کلیک بیرون از آن
-            document.addEventListener('click', function(e) {
-                dropdownMenuList.forEach(function(menu) {
-                    if (!menu.contains(e.target) && menu.classList.contains('show')) {
-                        menu.classList.remove('show');
-                    }
-                });
-            });
+            // اجرای تابع اصلاح منوهای کشویی
+            fixDropdowns();
+            
+            // اجرای مجدد در صورت تغییر DOM
+            const observer = new MutationObserver(fixDropdowns);
+            observer.observe(document.body, { subtree: true, childList: true });
         });
     </script>
     
