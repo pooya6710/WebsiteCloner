@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- استایل‌های سفارشی -->
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
     <!-- اسکریپت‌های مرورگر -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -33,7 +34,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav" style="z-index: 2000000 !important;">
+            <div class="collapse navbar-collapse" id="navbarNav" style="z-index: 5000000 !important; position: relative;">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">
@@ -55,11 +56,11 @@
                     </li>
                     {% endif %}
                     {% if current_user.is_admin %}
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown" style="position: static;">
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-shield-lock-fill me-1 text-warning"></i>مدیریت
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="adminDropdown" style="z-index: 3000000 !important;">
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown" style="z-index: 5000000 !important; position: absolute; top: 100%; right: 0;">
                             <li><a class="dropdown-item" href="{{ url_for('admin') }}">
                                 <i class="bi bi-speedometer me-2"></i>داشبورد مدیریت
                             </a></li>
@@ -83,11 +84,11 @@
                 
                 <div class="d-flex">
                     {% if current_user.is_authenticated %}
-                    <div class="dropdown">
+                    <div class="dropdown" style="position: static;">
                         <button class="btn btn-outline-info dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle me-1"></i>{{ current_user.username }}
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="z-index: 3000000 !important;">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="z-index: 5000000 !important; position: absolute; top: 100%; left: 0;">
                             <li><a class="dropdown-item" href="{{ url_for('settings') }}">
                                 <i class="bi bi-gear-fill me-2"></i>تنظیمات
                             </a></li>
@@ -182,6 +183,60 @@
     
     <!-- جاوااسکریپت بوت‌استرپ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- اسکریپت رفع مشکل منوهای کشویی -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // بهبود عملکرد منوهای کشویی
+            const dropdownToggleList = document.querySelectorAll('.dropdown-toggle');
+            const dropdownMenuList = document.querySelectorAll('.dropdown-menu');
+            
+            // تنظیم z-index برای همه منوهای کشویی
+            dropdownMenuList.forEach(function(menu) {
+                menu.style.zIndex = '10000000';
+                menu.style.position = 'absolute';
+            });
+            
+            // اضافه کردن Event listener برای دکمه‌های منوی کشویی
+            dropdownToggleList.forEach(function(dropdownToggle) {
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const targetMenu = document.querySelector(dropdownToggle.getAttribute('data-bs-target')) || 
+                                       dropdownToggle.nextElementSibling;
+                    
+                    // بستن سایر منوها
+                    dropdownMenuList.forEach(function(menu) {
+                        if (menu !== targetMenu && menu.classList.contains('show')) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                    
+                    // باز یا بسته کردن منوی هدف
+                    if (targetMenu) {
+                        targetMenu.classList.toggle('show');
+                        
+                        // تنظیم style به صورت مستقیم
+                        if (targetMenu.classList.contains('show')) {
+                            targetMenu.style.display = 'block';
+                            targetMenu.style.visibility = 'visible';
+                            targetMenu.style.opacity = '1';
+                            targetMenu.style.pointerEvents = 'auto';
+                        }
+                    }
+                });
+            });
+            
+            // بستن منو با کلیک بیرون از آن
+            document.addEventListener('click', function(e) {
+                dropdownMenuList.forEach(function(menu) {
+                    if (!menu.contains(e.target) && menu.classList.contains('show')) {
+                        menu.classList.remove('show');
+                    }
+                });
+            });
+        });
+    </script>
     
     <!-- اسکریپت‌های اضافی -->
     {% block scripts %}{% endblock %}

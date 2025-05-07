@@ -143,6 +143,8 @@ a:hover {
     max-height: 80vh; /* محدود کردن ارتفاع برای موبایل */
     overflow-y: auto; /* اسکرول خودکار در صورت لزوم */
     animation: dropdown-slide 0.3s ease;
+    display: block !important; /* اطمینان از نمایش */
+    pointer-events: auto !important; /* فعال کردن تعامل با منو */
 }
 
 .dropdown-item {
