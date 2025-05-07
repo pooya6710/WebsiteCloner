@@ -435,7 +435,7 @@ def reserve_all_day():
     day_menu = Menu.query.filter_by(day=day).first()
     if not day_menu:
         flash(f'منوی روز {day} یافت نشد', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     meal_data = day_menu.meal_data
     success_count = 0
@@ -488,13 +488,15 @@ def reserve_all_day():
         # به‌روزرسانی آمار مالی و بدهی‌ها
         update_financial_statistics()
         
+        week_type = "هفته آینده" if week_offset == 1 else "هفته جاری"
         meal_fa = 'وعده' if success_count == 1 else 'وعده'
-        flash(f'{success_count} {meal_fa} غذا برای روز {day} با موفقیت رزرو شد', 'success')
+        flash(f'{success_count} {meal_fa} غذا برای روز {day} ({week_type}) با موفقیت رزرو شد', 'success')
     else:
+        week_type = "هفته آینده" if week_offset == 1 else "هفته جاری"
         if already_reserved > 0:
-            flash(f'شما قبلاً تمام وعده‌های روز {day} را رزرو کرده‌اید', 'warning')
+            flash(f'شما قبلاً تمام وعده‌های روز {day} ({week_type}) را رزرو کرده‌اید', 'warning')
         else:
-            flash(f'هیچ وعده‌ای برای روز {day} رزرو نشد', 'warning')
+            flash(f'هیچ وعده‌ای برای روز {day} ({week_type}) رزرو نشد', 'warning')
     
     return redirect(url_for('dashboard'))
 
