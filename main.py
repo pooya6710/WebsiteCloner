@@ -484,6 +484,18 @@ def reserve():
     if not student:
         flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
         return redirect(url_for('menu', week=week_offset))
+        
+    # بررسی و تطبیق نام روز با هفته انتخاب شده
+    original_day = day  # نگهداری نام اصلی روز برای نمایش در پیام‌ها
+    
+    # در هفته آینده، اضافه کردن پسوند _next به روز در صورت نیاز
+    if week_offset == 1:  # هفته آینده
+        if "_next" not in day:
+            day = f"{day}_next"
+    else:  # هفته جاری
+        # حذف پسوند _next در صورت وجود
+        if "_next" in day:
+            day = day.replace("_next", "")
     
     # بررسی اینکه رزرو قبلاً انجام نشده باشد
     existing_reservation = Reservation.query.filter_by(
@@ -820,7 +832,33 @@ def admin_menu():
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
-    weekly_menu = Menu.query.all()
+    # گرفتن پارامتر هفته از URL (هفته جاری یا آینده)
+    week_offset = request.args.get('week', '0')
+    try:
+        week_offset = int(week_offset)
+    except ValueError:
+        week_offset = 0
+    
+    # محدود کردن week_offset به مقادیر معقول
+    if week_offset < 0:
+        week_offset = 0
+    elif week_offset > 1:
+        week_offset = 1
+    
+    # دریافت منوی هفتگی بر اساس هفته انتخاب شده
+    if week_offset == 1:  # هفته آینده
+        # تمام منوهایی که در نام آنها "_next" وجود دارد
+        weekly_menu = Menu.query.filter(Menu.day.like("%_next")).all()
+        # برای نمایش بهتر نام روزها بدون پسوند
+        for menu_item in weekly_menu:
+            menu_item.display_day = menu_item.day.replace("_next", "")
+    else:  # هفته جاری
+        # تمام منوهایی که "_next" در نام آنها وجود ندارد
+        weekly_menu = Menu.query.filter(~Menu.day.like("%_next")).all()
+        # تنظیم نام نمایشی یکسان با نام واقعی
+        for menu_item in weekly_menu:
+            menu_item.display_day = menu_item.day
+    
     # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
     days = OrderedDict([
         ("saturday", "شنبه"),
@@ -850,6 +888,21 @@ def admin_update_menu():
     day = request.form.get('day')
     meal = request.form.get('meal')
     food_items_text = request.form.get('food_items')
+    week_offset = request.args.get('week', '0')  # پارامتر انتخاب هفته
+    
+    # تعیین اینکه آیا منوی هفته آینده در حال ویرایش است
+    try:
+        week_offset = int(week_offset)
+        is_next_week = (week_offset == 1)
+    except ValueError:
+        is_next_week = False
+    
+    # اضافه کردن پسوند "_next" اگر در حال ویرایش هفته آینده هستیم
+    if is_next_week and not day.endswith('_next'):
+        day = f"{day}_next"
+    # برعکس: اطمینان از عدم وجود پسوند "_next" اگر در حال ویرایش هفته جاری هستیم
+    elif not is_next_week and day.endswith('_next'):
+        day = day.replace('_next', '')
     
     # بررسی اعتبار داده‌های ورودی
     if not day or not meal:
@@ -968,7 +1021,11 @@ def admin_update_menu():
         updated_menu = Menu.query.get(day_menu.id)
         print(f"Verification - Updated menu data: {updated_menu.meal_data}")
         
-        flash(f'منوی {meal} روز {day} با موفقیت به‌روزرسانی شد', 'success')
+        # تعیین پیام فلش با توجه به نوع هفته
+        if is_next_week:
+            flash(f'منوی {meal} روز {day.replace("_next", "")} هفته آینده با موفقیت به‌روزرسانی شد', 'success')
+        else:
+            flash(f'منوی {meal} روز {day} هفته جاری با موفقیت به‌روزرسانی شد', 'success')
     except Exception as e:
         db.session.rollback()
         # لاگ خطا با جزئیات بیشتر
@@ -978,7 +1035,8 @@ def admin_update_menu():
         print(f"Traceback: {error_details}")
         flash(f'خطا در به‌روزرسانی منو: {str(e)}', 'danger')
     
-    return redirect(url_for('admin_menu'))
+    # بازگشت به همان صفحه با حفظ پارامتر هفته
+    return redirect(url_for('admin_menu', week=week_offset))
 
 # تابع به‌روزرسانی قیمت‌های غذا در رزروهای موجود
 def update_reservation_prices():

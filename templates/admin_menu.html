@@ -65,12 +65,26 @@
         <div class="row">
             <div class="col-md-12 mb-4">
                 <div class="card">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">مدیریت منوی غذا</h3>
-                        <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="mb-0">مدیریت منوی غذا</h3>
+                            <a href="{{ url_for('admin') }}" class="btn btn-light">بازگشت به پنل مدیریت</a>
+                        </div>
+                        
+                        <!-- انتخاب هفته جاری یا آینده -->
+                        <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ url_for('admin_menu', week=0) }}" class="btn {% if request.args.get('week', '0') == '0' %}btn-success{% else %}btn-outline-light{% endif %} flex-grow-1">
+                                    <i class="bi bi-calendar-check"></i> ویرایش منوی هفته جاری
+                                </a>
+                                <a href="{{ url_for('admin_menu', week=1) }}" class="btn {% if request.args.get('week', '0') == '1' %}btn-success{% else %}btn-outline-light{% endif %} flex-grow-1">
+                                    <i class="bi bi-calendar-plus"></i> ویرایش منوی هفته آینده
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <form action="{{ url_for('admin_update_menu') }}" method="POST">
+                        <form action="{{ url_for('admin_update_menu', week=request.args.get('week', '0')) }}" method="POST">
                             <div class="row mb-4">
                                 <div class="col-md-4 mb-3">
                                     <label for="day" class="form-label">انتخاب روز</label>
@@ -126,7 +140,7 @@
                                 <tbody>
                                     {% for day_item in weekly_menu %}
                                     <tr>
-                                        <td><strong>{{ days[day_item.day] }}</strong></td>
+                                        <td><strong>{{ days[day_item.display_day] }}</strong></td>
                                         <td>
                                             {% if day_item.meal_data.breakfast and day_item.meal_data.breakfast|length > 0 %}
                                                 {% set food = day_item.meal_data.breakfast[0] %}
@@ -212,10 +226,19 @@
                 
                 // عملیات بارگیری منوی انتخاب شده
                 loadMenuBtn.addEventListener('click', function() {
-                    const day = daySelect.value;
+                    let day = daySelect.value;
                     const meal = mealSelect.value;
+                    // بررسی آیا در حالت هفته آینده هستیم
+                    const isNextWeek = {{ request.args.get('week', '0') }} === '1' || {{ request.args.get('week', '0') }} === 1;
                     
-                    console.log(`تلاش برای بارگیری منوی ${day} وعده ${meal}`);
+                    // اضافه کردن یا حذف پسوند _next بر اساس هفته انتخاب شده
+                    if (isNextWeek && !day.endsWith('_next')) {
+                        day = day + '_next';
+                    } else if (!isNextWeek && day.endsWith('_next')) {
+                        day = day.replace('_next', '');
+                    }
+                    
+                    console.log(`تلاش برای بارگیری منوی ${day} وعده ${meal} (هفته ${isNextWeek ? 'آینده' : 'جاری'})`);
                     
                     // بررسی وجود داده‌های منو
                     if (menuData[day] && menuData[day][meal]) {
