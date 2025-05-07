@@ -33,7 +33,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarNav" style="z-index: 2000000 !important;">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">
@@ -59,7 +59,7 @@
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-shield-lock-fill me-1 text-warning"></i>مدیریت
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown" style="z-index: 3000000 !important;">
                             <li><a class="dropdown-item" href="{{ url_for('admin') }}">
                                 <i class="bi bi-speedometer me-2"></i>داشبورد مدیریت
                             </a></li>
@@ -87,7 +87,7 @@
                         <button class="btn btn-outline-info dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle me-1"></i>{{ current_user.username }}
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="z-index: 3000000 !important;">
                             <li><a class="dropdown-item" href="{{ url_for('settings') }}">
                                 <i class="bi bi-gear-fill me-2"></i>تنظیمات
                             </a></li>
