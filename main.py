@@ -1258,6 +1258,9 @@ def admin_update_menu():
         # تخلیه کش SQLAlchemy
         db.session.expire_all()
         
+        # تعهد به دیتابیس باید اول انجام شود
+        db.session.commit()
+        
         # تایید نهایی تغییرات با دریافت مجدد از دیتابیس
         updated_menu = Menu.query.get(day_menu.id)
         print(f"Verification - Updated menu data: {updated_menu.meal_data}")

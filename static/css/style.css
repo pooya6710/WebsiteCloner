@@ -193,7 +193,17 @@ select.form-select {
 
 /* اضافه کردن z-index به المان‌های ثابت */
 .navbar {
-    z-index: 9000 !important;
+    z-index: 100000 !important;
+}
+
+/* تنظیمات جدید برای منوی کشویی در بخش مدیریت */
+.dropdown-menu.show {
+    z-index: 1100000 !important;
+    position: absolute !important;
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
 }
 
 /* تنظیم پوزیشن منو برای حل مشکل نمایش در موبایل */
