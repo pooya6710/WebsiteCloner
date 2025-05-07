@@ -29,6 +29,11 @@
     --danger-color: #ff3b30;
     --warning-color: #ff9500;
     --info-color: #5ac8fa;
+    
+    /* اضافه کردن سایه باکس برای کارت‌ها */
+    --dropdown-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    --hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    --special-shadow: 0 15px 35px rgba(78, 84, 200, 0.4);
 }
 
 body {
@@ -132,11 +137,12 @@ a:hover {
     z-index: 9999999 !important; /* افزایش z-index به مقدار بسیار بالاتر */
     background-color: var(--primary-dark);
     border: 1px solid var(--secondary-color);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--dropdown-shadow);
     position: absolute !important;
     transform: none !important;
     max-height: 80vh; /* محدود کردن ارتفاع برای موبایل */
     overflow-y: auto; /* اسکرول خودکار در صورت لزوم */
+    animation: dropdown-slide 0.3s ease;
 }
 
 .dropdown-item {
@@ -174,9 +180,14 @@ select.form-select {
     position: relative;
 }
 
-/* انیمیشن نمایش منو */
+/* انیمیشن‌های مختلف */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dropdown-slide {
+    from { opacity: 0; transform: translateY(-15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 

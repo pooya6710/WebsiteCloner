@@ -140,7 +140,7 @@
         
         <!-- بخش آمار -->
         <div class="row mb-4">
-            <div class="col-md-4 col-sm-6 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
                 <div class="dashboard-stats">
                     <div class="text-center">
                         <i class="bi bi-person-badge stat-icon"></i>
@@ -149,7 +149,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-6 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
                 <div class="dashboard-stats">
                     <div class="text-center">
                         <i class="bi bi-cart-check stat-icon"></i>
@@ -158,12 +158,21 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-6 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
                 <div class="dashboard-stats">
                     <div class="text-center">
                         <i class="bi bi-check-circle-fill stat-icon"></i>
                         <h3 class="stat-value">{{ delivered_count }}</h3>
                         <p class="stat-label">تحویل شده</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="dashboard-stats">
+                    <div class="text-center">
+                        <i class="bi bi-wallet2 stat-icon"></i>
+                        <h3 class="stat-value">{{ "{:,}".format(student.debt|int) }}</h3>
+                        <p class="stat-label">بدهی (تومان)</p>
                     </div>
                 </div>
             </div>
@@ -191,7 +200,7 @@
                                 <i class="bi bi-wallet2 fs-1 me-3 text-success"></i>
                                 <div>
                                     <h5 class="mb-0">بدهی دانشجو:</h5>
-                                    <p class="fs-4 mb-0 text-danger">{{ student.debt|int }} تومان</p>
+                                    <p class="fs-4 mb-0 {% if student.debt > 0 %}text-danger{% else %}text-success{% endif %}">{{ "{:,}".format(student.debt|int) }} تومان</p>
                                 </div>
                             </div>
                         </div>
