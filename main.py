@@ -255,87 +255,297 @@ def update_week_schedule():
     اگر هفته جاری به پایان رسیده باشد، هفته آینده به هفته جاری تبدیل شده
     و یک هفته آینده جدید ایجاد می‌شود.
     """
-    # دریافت منوی هفتگی
-    weekly_menu = Menu.query.all()
-    
-    if not weekly_menu or len(weekly_menu) == 0:
-        # اگر منویی وجود ندارد، نیازی به بررسی نیست
-        return
-    
-    # تاریخ امروز
-    today = datetime.datetime.now()
-    current_jalali_date = jdatetime.date.fromgregorian(date=today.date())
-    
-    # محاسبه شنبه این هفته (روز اول هفته)
-    # در تقویم شمسی، شنبه روز اول هفته (۰) است
-    current_weekday = current_jalali_date.weekday()
-    days_to_saturday = current_weekday  # تعداد روزهایی که باید به عقب برگردیم تا به شنبه برسیم
-    
-    # محاسبه شنبه این هفته
-    saturday_date = current_jalali_date - jdatetime.timedelta(days=days_to_saturday)
-    
-    # محاسبه شنبه هفته آینده
-    next_saturday_date = saturday_date + jdatetime.timedelta(days=7)
-    
-    # محاسبه جمعه هفته جاری
-    friday_date = saturday_date + jdatetime.timedelta(days=6)
-    
-    # اگر امروز جمعه هفته جاری یا بعد از آن است، باید هفته‌ها به‌روزرسانی شوند
-    if current_jalali_date >= friday_date:
-        print(f"✓ به‌روزرسانی خودکار هفته‌ها - تاریخ فعلی: {current_jalali_date}")
-        print(f"✓ هفته جاری به پایان رسیده (جمعه: {friday_date})")
-        print(f"✓ هفته آینده ({next_saturday_date}) به هفته جاری تبدیل می‌شود")
+    try:
+        # دریافت منوی هفتگی با اطمینان از تازه بودن داده‌ها
+        db.session.expire_all()
+        weekly_menu = Menu.query.all()
         
-        try:
-            # دریافت منوی هفته آینده
-            next_week_menus = []
-            for menu_item in Menu.query.all():
-                # بررسی اینکه آیا این آیتم منو مربوط به هفته آینده است
-                if "_next" in menu_item.day:
-                    next_week_menus.append(menu_item)
+        if not weekly_menu or len(weekly_menu) == 0:
+            print("⚠️ هیچ منویی در سیستم یافت نشد - ایجاد منوی پیش‌فرض...")
+            # ایجاد منوی پیش‌فرض برای هفته جاری و آینده
+            create_default_menu_structure()
+            weekly_menu = Menu.query.all()
+            if not weekly_menu or len(weekly_menu) == 0:
+                return
+        
+        # تاریخ امروز
+        today = datetime.datetime.now()
+        current_jalali_date = jdatetime.date.fromgregorian(date=today.date())
+        
+        # محاسبه شنبه این هفته (روز اول هفته)
+        # در تقویم شمسی، شنبه روز اول هفته (۰) است
+        current_weekday = current_jalali_date.weekday()
+        days_to_saturday = current_weekday  # تعداد روزهایی که باید به عقب برگردیم تا به شنبه برسیم
+        
+        # محاسبه شنبه این هفته
+        saturday_date = current_jalali_date - jdatetime.timedelta(days=days_to_saturday)
+        
+        # محاسبه شنبه هفته آینده
+        next_saturday_date = saturday_date + jdatetime.timedelta(days=7)
+        
+        # محاسبه پنجشنبه هفته جاری (آخرین روز کاری هفته)
+        thursday_date = saturday_date + jdatetime.timedelta(days=5)
+        
+        # محاسبه جمعه هفته جاری
+        friday_date = saturday_date + jdatetime.timedelta(days=6)
+        
+        # بررسی اینکه آیا روز پنجشنبه یا جمعه است (روزهای نزدیک به پایان هفته)
+        is_end_of_week = current_jalali_date >= thursday_date
+        
+        # اگر امروز جمعه هفته جاری یا بعد از آن است، باید هفته‌ها به‌روزرسانی شوند
+        if current_jalali_date >= friday_date:
+            print(f"✓ به‌روزرسانی خودکار هفته‌ها - تاریخ فعلی: {current_jalali_date}")
+            print(f"✓ هفته جاری به پایان رسیده (جمعه: {friday_date})")
+            print(f"✓ هفته آینده ({next_saturday_date}) به هفته جاری تبدیل می‌شود")
             
-            # ذخیره منوی هفته آینده برای کپی کردن به هفته جاری
-            next_week_menu = {}
-            for menu_item in next_week_menus:
-                # استخراج روز بدون پسوند "_next"
-                day = menu_item.day.replace("_next", "")
-                # ذخیره داده‌های منو
-                next_week_menu[day] = menu_item.meal_data
-                # حذف منوی هفته آینده فعلی
-                db.session.delete(menu_item)
+            # اطمینان از وجود منوی هفته آینده
+            ensure_next_week_menus_exist()
             
-            # به‌روزرسانی منوی هفته جاری با منوی هفته آینده
-            current_week_days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
-            for day in current_week_days:
-                day_menu = Menu.query.filter_by(day=day).first()
-                if day_menu and day in next_week_menu:
-                    day_menu.meal_data = next_week_menu[day]
-                    db.session.add(day_menu)
+            try:
+                # جلوگیری از تکرار به‌روزرسانی هفته با بررسی وجود لاگ زمان آخرین به‌روزرسانی
+                last_update_log = os.path.join('logs', 'last_week_update.log')
+                should_update = True
+                
+                # بررسی زمان آخرین به‌روزرسانی
+                try:
+                    if os.path.exists(last_update_log):
+                        with open(last_update_log, 'r') as f:
+                            last_update_text = f.read().strip()
+                            if last_update_text:
+                                last_update_date = jdatetime.datetime.strptime(last_update_text, '%Y-%m-%d')
+                                # اگر در هفته جاری قبلاً به‌روزرسانی انجام شده، دوباره انجام نمی‌شود
+                                if last_update_date.date() >= saturday_date:
+                                    should_update = False
+                                    print(f"⚠️ قبلاً در این هفته به‌روزرسانی انجام شده است ({last_update_text})")
+                except Exception as log_error:
+                    print(f"⚠️ خطا در خواندن لاگ به‌روزرسانی: {str(log_error)}")
+                
+                if should_update:
+                    # دریافت منوی هفته آینده
+                    next_week_menus = []
+                    for menu_item in Menu.query.filter(Menu.day.like("%_next")).all():
+                        next_week_menus.append(menu_item)
+                    
+                    if not next_week_menus:
+                        print("⚠️ هیچ منوی هفته آینده‌ای یافت نشد - ایجاد منوی پیش‌فرض برای هفته آینده...")
+                        # ایجاد منوی پیش‌فرض برای هفته آینده
+                        ensure_next_week_menus_exist()
+                        next_week_menus = Menu.query.filter(Menu.day.like("%_next")).all()
+                    
+                    # ذخیره منوی هفته آینده برای کپی کردن به هفته جاری
+                    next_week_menu = {}
+                    for menu_item in next_week_menus:
+                        # استخراج روز بدون پسوند "_next"
+                        day = menu_item.day.replace("_next", "")
+                        # ذخیره داده‌های منو
+                        next_week_menu[day] = menu_item.meal_data
+                        # حذف منوی هفته آینده فعلی
+                        db.session.delete(menu_item)
+                    
+                    # به‌روزرسانی منوی هفته جاری با منوی هفته آینده
+                    current_week_days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
+                    for day in current_week_days:
+                        day_menu = Menu.query.filter_by(day=day).first()
+                        if day_menu and day in next_week_menu:
+                            day_menu.meal_data = next_week_menu[day]
+                            db.session.add(day_menu)
+                        elif day in next_week_menu:  # اگر منوی روز در هفته جاری وجود ندارد اما در هفته آینده وجود دارد
+                            # ایجاد منوی جدید برای این روز در هفته جاری
+                            new_current_menu = Menu(
+                                day=day,
+                                meal_data=next_week_menu[day]
+                            )
+                            db.session.add(new_current_menu)
+                    
+                    # اطمینان از اینکه تمام منوهای هفته جاری وجود دارند
+                    for day in current_week_days:
+                        day_menu = Menu.query.filter_by(day=day).first()
+                        if not day_menu:
+                            # ایجاد منوی خالی برای این روز
+                            empty_menu = {
+                                "breakfast": [],
+                                "lunch": [],
+                                "dinner": []
+                            }
+                            new_menu = Menu(
+                                day=day,
+                                meal_data=empty_menu
+                            )
+                            db.session.add(new_menu)
+                            print(f"✓ منوی خالی برای روز {day} در هفته جاری ایجاد شد")
+                    
+                    # ایجاد منوی هفته آینده جدید با کپی از منوی هفته جاری
+                    for day in current_week_days:
+                        # منوی روز در هفته جاری
+                        day_menu = Menu.query.filter_by(day=day).first()
+                        if day_menu:
+                            # ایجاد یا به‌روزرسانی منوی هفته آینده
+                            next_day = f"{day}_next"
+                            next_day_menu = Menu(
+                                day=next_day,
+                                meal_data=day_menu.meal_data
+                            )
+                            db.session.add(next_day_menu)
+                            print(f"✓ منوی هفته آینده برای روز {day} ایجاد شد")
+                    
+                    # ثبت زمان به‌روزرسانی
+                    try:
+                        os.makedirs('logs', exist_ok=True)
+                        with open(last_update_log, 'w') as f:
+                            f.write(current_jalali_date.strftime('%Y-%m-%d'))
+                    except Exception as log_error:
+                        print(f"⚠️ خطا در نوشتن لاگ به‌روزرسانی: {str(log_error)}")
+                    
+                    db.session.commit()
+                    print("✓ به‌روزرسانی هفته‌ها با موفقیت انجام شد")
+                
+            except Exception as e:
+                db.session.rollback()
+                print(f"✗ خطا در به‌روزرسانی هفته‌ها: {str(e)}")
+                import traceback
+                print(f"جزئیات خطا: {traceback.format_exc()}")
+        
+        elif is_end_of_week:
+            # اگر پنجشنبه هستیم، اطمینان حاصل کنیم که منوی هفته آینده وجود دارد
+            ensure_next_week_menus_exist()
+            print(f"✓ روز پنجشنبه هفته جاری است - اطمینان از وجود منوی هفته آینده")
             
-            # ایجاد منوی هفته آینده جدید با کپی از منوی هفته جاری
-            for day in current_week_days:
-                day_menu = Menu.query.filter_by(day=day).first()
-                if day_menu:
-                    # بررسی اینکه آیا منوی هفته آینده قبلاً وجود دارد
-                    next_day_menu = Menu.query.filter_by(day=f"{day}_next").first()
-                    if next_day_menu:
-                        # به‌روزرسانی منوی موجود
-                        next_day_menu.meal_data = day_menu.meal_data
-                        db.session.add(next_day_menu)
-                    else:
-                        # ایجاد منوی هفته آینده جدید
-                        new_menu = Menu(
-                            day=f"{day}_next",
-                            meal_data=day_menu.meal_data
-                        )
-                        db.session.add(new_menu)
-            
-            db.session.commit()
-            print("✓ به‌روزرسانی هفته‌ها با موفقیت انجام شد")
-            
-        except Exception as e:
-            db.session.rollback()
-            print(f"✗ خطا در به‌روزرسانی هفته‌ها: {str(e)}")
+    except Exception as e:
+        print(f"✗ خطای کلی در تابع به‌روزرسانی هفته‌ها: {str(e)}")
+        import traceback
+        print(f"جزئیات خطا: {traceback.format_exc()}")
+
+
+def ensure_next_week_menus_exist():
+    """
+    اطمینان از وجود منوهای هفته آینده
+    این تابع بررسی می‌کند که آیا منوهای هفته آینده وجود دارند و در صورت نیاز آنها را ایجاد می‌کند
+    """
+    try:
+        current_week_days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
+        next_week_days = [f"{day}_next" for day in current_week_days]
+        
+        # بررسی منوهای هفته آینده
+        existing_next_week_menus = Menu.query.filter(Menu.day.like("%_next")).all()
+        existing_next_days = [menu.day for menu in existing_next_week_menus]
+        
+        for day, next_day in zip(current_week_days, next_week_days):
+            if next_day not in existing_next_days:
+                # منوی این روز در هفته آینده وجود ندارد
+                # بررسی منوی روز مشابه در هفته جاری
+                current_day_menu = Menu.query.filter_by(day=day).first()
+                
+                if current_day_menu:
+                    # کپی منو از هفته جاری
+                    menu_data = current_day_menu.meal_data
+                else:
+                    # ایجاد منوی خالی پیش‌فرض
+                    menu_data = {
+                        "breakfast": [],
+                        "lunch": [],
+                        "dinner": []
+                    }
+                
+                # ایجاد منوی هفته آینده
+                new_next_menu = Menu(
+                    day=next_day,
+                    meal_data=menu_data
+                )
+                db.session.add(new_next_menu)
+                print(f"✓ منوی هفته آینده برای روز {day} (با ID {next_day}) ایجاد شد")
+        
+        db.session.commit()
+        print("✓ بررسی و ایجاد منوهای هفته آینده با موفقیت انجام شد")
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"✗ خطا در اطمینان از وجود منوهای هفته آینده: {str(e)}")
+        import traceback
+        print(f"جزئیات خطا: {traceback.format_exc()}")
+
+
+def create_default_menu_structure():
+    """
+    ایجاد ساختار پیش‌فرض منو برای هفته جاری و آینده
+    این تابع در صورتی که هیچ منویی در سیستم وجود نداشته باشد فراخوانی می‌شود
+    """
+    try:
+        current_week_days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
+        
+        # یک منوی پیش‌فرض با غذاهای نمونه
+        default_menu_data = {
+            "breakfast": [{"name": "نان و پنیر و چای", "price": 2000}],
+            "lunch": [{"name": "چلو خورشت قیمه", "price": 3000}],
+            "dinner": [{"name": "چلو کباب کوبیده", "price": 5000}]
+        }
+        
+        # ایجاد منوی هفته جاری
+        for day in current_week_days:
+            menu = Menu.query.filter_by(day=day).first()
+            if not menu:
+                # برای هر روز یک منوی کمی متفاوت ایجاد می‌کنیم
+                menu_data = default_menu_data.copy()
+                
+                # تنوع در غذاها بر اساس روز هفته
+                if day == "saturday":
+                    menu_data["lunch"] = [{"name": "زرشک پلو با مرغ", "price": 3000}]
+                elif day == "sunday":
+                    menu_data["dinner"] = [{"name": "چلو خورشت قورمه سبزی", "price": 5000}]
+                elif day == "monday":
+                    menu_data["lunch"] = [{"name": "عدس پلو با گوشت چرخ کرده", "price": 3000}]
+                elif day == "tuesday":
+                    menu_data["dinner"] = [{"name": "چلو جوجه کباب", "price": 5000}]
+                elif day == "wednesday":
+                    menu_data["lunch"] = [{"name": "چلو خورشت بادمجان", "price": 3000}]
+                elif day == "thursday":
+                    menu_data["lunch"] = [{"name": "ماکارونی با گوشت چرخ کرده", "price": 3000}]
+                    menu_data["dinner"] = [{"name": "چلو کباب بختیاری", "price": 5000}]
+                
+                new_menu = Menu(
+                    day=day,
+                    meal_data=menu_data
+                )
+                db.session.add(new_menu)
+                print(f"✓ منوی پیش‌فرض برای روز {day} هفته جاری ایجاد شد")
+        
+        # ایجاد منوی هفته آینده
+        for day in current_week_days:
+            next_day = f"{day}_next"
+            menu = Menu.query.filter_by(day=next_day).first()
+            if not menu:
+                # برای هفته آینده منوی متفاوتی ایجاد می‌کنیم
+                menu_data = default_menu_data.copy()
+                
+                # تنوع در غذاها بر اساس روز هفته
+                if day == "saturday":
+                    menu_data["lunch"] = [{"name": "چلو کباب کوبیده", "price": 3000}]
+                elif day == "sunday":
+                    menu_data["dinner"] = [{"name": "چلو خورشت فسنجان", "price": 5000}]
+                elif day == "monday":
+                    menu_data["lunch"] = [{"name": "لوبیا پلو با گوشت", "price": 3000}]
+                elif day == "tuesday":
+                    menu_data["dinner"] = [{"name": "چلو کباب بختیاری", "price": 5000}]
+                elif day == "wednesday":
+                    menu_data["lunch"] = [{"name": "چلو خورشت کرفس", "price": 3000}]
+                elif day == "thursday":
+                    menu_data["lunch"] = [{"name": "استامبولی پلو با گوشت", "price": 3000}]
+                    menu_data["dinner"] = [{"name": "مرغ سوخاری با سیب زمینی", "price": 5000}]
+                
+                new_menu = Menu(
+                    day=next_day,
+                    meal_data=menu_data
+                )
+                db.session.add(new_menu)
+                print(f"✓ منوی پیش‌فرض برای روز {day} هفته آینده ایجاد شد")
+        
+        db.session.commit()
+        print("✓ ساختار پیش‌فرض منو با موفقیت ایجاد شد")
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"✗ خطا در ایجاد ساختار پیش‌فرض منو: {str(e)}")
+        import traceback
+        print(f"جزئیات خطا: {traceback.format_exc()}")
 
 @app.route('/menu')
 @login_required
