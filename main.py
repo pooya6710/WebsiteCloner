@@ -334,6 +334,19 @@ def menu():
 @app.route('/reserve', methods=['POST'])
 @login_required
 def reserve():
+    # گرفتن پارامتر هفته از URL (اگر وجود داشته باشد)
+    week_offset = request.args.get('week', '0')
+    try:
+        week_offset = int(week_offset)
+    except ValueError:
+        week_offset = 0
+    
+    # محدود کردن week_offset به مقادیر معقول (0 = هفته جاری، 1 = هفته آینده)
+    if week_offset < 0:
+        week_offset = 0
+    elif week_offset > 1:
+        week_offset = 1
+    
     day = request.form.get('day')
     meal = request.form.get('meal')
     food_name = request.form.get('food_name')
@@ -354,13 +367,13 @@ def reserve():
     
     if not all([day, meal, food_name]):
         flash('لطفاً تمام فیلدها را پر کنید', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     # دریافت اطلاعات دانشجو
     student = Student.query.filter_by(user_id=str(current_user.id)).first()
     if not student:
         flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     # بررسی اینکه رزرو قبلاً انجام نشده باشد
     existing_reservation = Reservation.query.filter_by(
@@ -369,7 +382,7 @@ def reserve():
     
     if existing_reservation:
         flash(f'شما قبلاً برای {day} وعده {meal} رزرو کرده‌اید', 'warning')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     # ایجاد رزرو جدید
     new_reservation = Reservation(
@@ -386,23 +399,37 @@ def reserve():
     # به‌روزرسانی بدهی دانشجو و آمار مالی کل سیستم
     update_financial_statistics()
     
-    flash(f'رزرو شما برای {day} وعده {meal} با موفقیت ثبت شد', 'success')
+    week_type = "هفته آینده" if week_offset == 1 else "هفته جاری"
+    flash(f'رزرو شما برای {day} وعده {meal} ({week_type}) با موفقیت ثبت شد', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/reserve_all_day', methods=['POST'])
 @login_required
 def reserve_all_day():
+    # گرفتن پارامتر هفته از URL (اگر وجود داشته باشد)
+    week_offset = request.args.get('week', '0')
+    try:
+        week_offset = int(week_offset)
+    except ValueError:
+        week_offset = 0
+    
+    # محدود کردن week_offset به مقادیر معقول (0 = هفته جاری، 1 = هفته آینده)
+    if week_offset < 0:
+        week_offset = 0
+    elif week_offset > 1:
+        week_offset = 1
+    
     day = request.form.get('day')
     
     if not day:
         flash('روز مورد نظر مشخص نشده است', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     # دریافت اطلاعات دانشجو
     student = Student.query.filter_by(user_id=str(current_user.id)).first()
     if not student:
         flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     # دریافت منوی روز مورد نظر
     day_menu = Menu.query.filter_by(day=day).first()
@@ -996,17 +1023,34 @@ def admin_delivery(reservation_id):
 @app.route('/reserve_all_week', methods=['POST'])
 @login_required
 def reserve_all_week():
+    # گرفتن پارامتر هفته از URL (اگر وجود داشته باشد)
+    week_offset = request.args.get('week', '0')
+    try:
+        week_offset = int(week_offset)
+    except ValueError:
+        week_offset = 0
+    
+    # محدود کردن week_offset به مقادیر معقول (0 = هفته جاری، 1 = هفته آینده)
+    if week_offset < 0:
+        week_offset = 0
+    elif week_offset > 1:
+        week_offset = 1
+    
     # دریافت اطلاعات دانشجو
     student = Student.query.filter_by(user_id=str(current_user.id)).first()
     if not student:
         flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
     
     # دریافت منوی هفتگی
     weekly_menu = Menu.query.all()
     if not weekly_menu:
         flash('منوی هفتگی یافت نشد', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('menu', week=week_offset))
+    
+    # مرتب‌سازی منوی هفتگی بر اساس ترتیب روزهای هفته
+    day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
+    weekly_menu.sort(key=lambda x: day_order.get(x.day, 7))
     
     success_count = 0
     already_reserved = 0
@@ -1060,13 +1104,15 @@ def reserve_all_week():
         print("✓ فراخوانی تابع به‌روزرسانی آمار مالی پس از رزرو هفتگی")
         update_financial_statistics()
         
+        week_type = "هفته آینده" if week_offset == 1 else "هفته جاری"
         meal_fa = 'وعده' if success_count == 1 else 'وعده'
-        flash(f'{success_count} {meal_fa} غذا برای کل هفته با موفقیت رزرو شد', 'success')
+        flash(f'{success_count} {meal_fa} غذا برای {week_type} با موفقیت رزرو شد', 'success')
     else:
+        week_type = "هفته آینده" if week_offset == 1 else "هفته جاری"
         if already_reserved > 0:
-            flash('شما قبلاً تمام وعده‌های هفته را رزرو کرده‌اید', 'warning')
+            flash(f'شما قبلاً تمام وعده‌های {week_type} را رزرو کرده‌اید', 'warning')
         else:
-            flash('هیچ وعده‌ای برای هفته رزرو نشد', 'warning')
+            flash(f'هیچ وعده‌ای برای {week_type} رزرو نشد', 'warning')
     
     return redirect(url_for('dashboard'))
 
