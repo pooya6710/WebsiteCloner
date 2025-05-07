@@ -129,16 +129,19 @@ a:hover {
 }
 
 .dropdown-menu {
-    z-index: 999999 !important; /* افزایش z-index به مقدار بسیار بالاتر */
+    z-index: 9999999 !important; /* افزایش z-index به مقدار بسیار بالاتر */
     background-color: var(--primary-dark);
     border: 1px solid var(--secondary-color);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: absolute !important;
     transform: none !important;
+    max-height: 80vh; /* محدود کردن ارتفاع برای موبایل */
+    overflow-y: auto; /* اسکرول خودکار در صورت لزوم */
 }
 
 .dropdown-item {
     color: var(--light-color);
+    padding: 12px 20px; /* افزایش سایز برای لمس آسان‌تر */
 }
 
 .dropdown-item:hover, .dropdown-item:focus {
@@ -151,7 +154,8 @@ a:hover {
     margin-top: 0;
     position: absolute !important;
     top: 100% !important;
-    z-index: 999999 !important;
+    z-index: 9999999 !important;
+    min-width: 200px; /* عرض مناسب برای خوانایی */
 }
 
 /* اطمینان از نمایش مناسب منوهای کشویی */
@@ -161,6 +165,19 @@ a:hover {
     visibility: visible !important;
     transform: none !important;
     pointer-events: auto !important;
+    animation: fadeIn 0.2s ease; /* انیمیشن نمایش منو */
+}
+
+/* رفع مشکل برای select inputs */
+select.form-select {
+    z-index: 99999 !important;
+    position: relative;
+}
+
+/* انیمیشن نمایش منو */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* اضافه کردن z-index به المان‌های ثابت */
