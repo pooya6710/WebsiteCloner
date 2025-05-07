@@ -116,7 +116,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="col-md-3 mb-3 mb-md-0">
                                 <div class="card text-bg-primary">
                                     <div class="card-body text-center py-3">
                                         <h5 class="card-title"><i class="bi bi-list-check"></i> تعداد کل رزروها</h5>
@@ -125,32 +125,29 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="col-md-3 mb-3 mb-md-0">
                                 <div class="card text-bg-info">
                                     <div class="card-body text-center py-3">
                                         <h5 class="card-title"><i class="bi bi-check-circle"></i> تحویل شده</h5>
-                                        {% set delivered_count = 0 %}
-                                        {% for reservation in reservations %}
-                                            {% if reservation.delivered == 1 %}
-                                                {% set delivered_count = delivered_count + 1 %}
-                                            {% endif %}
-                                        {% endfor %}
                                         <p class="display-6 mb-0">{{ delivered_count }} <small>عدد</small></p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="col-md-3 mb-3 mb-md-0">
                                 <div class="card text-bg-warning">
                                     <div class="card-body text-center py-3">
                                         <h5 class="card-title"><i class="bi bi-hourglass-split"></i> منتظر تحویل</h5>
-                                        {% set pending_count = 0 %}
-                                        {% for reservation in reservations %}
-                                            {% if reservation.delivered == 0 %}
-                                                {% set pending_count = pending_count + 1 %}
-                                            {% endif %}
-                                        {% endfor %}
                                         <p class="display-6 mb-0">{{ pending_count }} <small>عدد</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="card text-bg-success">
+                                    <div class="card-body text-center py-3">
+                                        <h5 class="card-title"><i class="bi bi-coin"></i> مجموع هزینه</h5>
+                                        <p class="display-6 mb-0">{{ "{:,}".format(total_reserved_cost) }} <small>تومان</small></p>
                                     </div>
                                 </div>
                             </div>

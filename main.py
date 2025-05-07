@@ -1042,6 +1042,9 @@ def admin_menu():
         flash('شما دسترسی به این بخش را ندارید', 'danger')
         return redirect(url_for('dashboard'))
     
+    # بررسی و به‌روزرسانی خودکار هفته‌ها
+    update_week_schedule()
+    
     # گرفتن پارامتر هفته از URL (هفته جاری یا آینده)
     week_offset = request.args.get('week', '0')
     try:
@@ -1055,19 +1058,30 @@ def admin_menu():
     elif week_offset > 1:
         week_offset = 1
     
+    # اطمینان از وجود منوی هفته آینده
+    ensure_next_week_menus_exist()
+    
     # دریافت منوی هفتگی بر اساس هفته انتخاب شده
     if week_offset == 1:  # هفته آینده
         # تمام منوهایی که در نام آنها "_next" وجود دارد
         weekly_menu = Menu.query.filter(Menu.day.like("%_next")).all()
+        print(f"تعداد منوهای هفته آینده: {len(weekly_menu)}")
         # برای نمایش بهتر نام روزها بدون پسوند
         for menu_item in weekly_menu:
             menu_item.display_day = menu_item.day.replace("_next", "")
     else:  # هفته جاری
         # تمام منوهایی که "_next" در نام آنها وجود ندارد
         weekly_menu = Menu.query.filter(~Menu.day.like("%_next")).all()
+        print(f"تعداد منوهای هفته جاری: {len(weekly_menu)}")
         # تنظیم نام نمایشی یکسان با نام واقعی
         for menu_item in weekly_menu:
             menu_item.display_day = menu_item.day
+    
+    # تعریف ترتیب روزهای هفته برای مرتب‌سازی
+    day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
+    
+    # مرتب‌سازی منوی هفتگی بر اساس ترتیب روزهای هفته
+    weekly_menu.sort(key=lambda x: day_order.get(x.display_day, 7))
     
     # استفاده از OrderedDict برای حفظ ترتیب روزها (شنبه در ابتدا)
     days = OrderedDict([
@@ -1084,6 +1098,9 @@ def admin_menu():
         "lunch": "ناهار",
         "dinner": "شام"
     }
+    
+    # به‌روزرسانی آمار مالی و بدهی‌ها
+    update_financial_statistics()
     
     return render_template('admin_menu.html', weekly_menu=weekly_menu, days=days, meals=meals)
 
