@@ -217,6 +217,9 @@ def dashboard():
     # به‌روزرسانی آمار مالی و بدهی‌ها
     update_financial_statistics()
     
+    # بررسی و به‌روزرسانی خودکار هفته‌ها
+    update_week_schedule()
+    
     # دریافت اطلاعات دانشجو
     student = Student.query.filter_by(user_id=str(current_user.id)).first()
     if not student:
@@ -225,6 +228,9 @@ def dashboard():
     
     # دریافت رزروهای دانشجو
     reservations = Reservation.query.filter_by(student_id=student.id).all()
+    
+    # محاسبه تعداد غذاهای تحویل شده
+    delivered_count = Reservation.query.filter_by(student_id=student.id, delivered=1).count()
     
     # تبدیل تاریخ‌ها به شمسی
     jalali_dates = {}
@@ -239,11 +245,104 @@ def dashboard():
                            student=student, 
                            reservations=reservations, 
                            jalali_dates=jalali_dates,
-                           now_jalali=now_jalali)
+                           now_jalali=now_jalali,
+                           delivered_count=delivered_count)
+
+# تابع به‌روزرسانی خودکار هفته‌ها
+def update_week_schedule():
+    """
+    بررسی تاریخ فعلی و به‌روزرسانی خودکار هفته‌ها
+    اگر هفته جاری به پایان رسیده باشد، هفته آینده به هفته جاری تبدیل شده
+    و یک هفته آینده جدید ایجاد می‌شود.
+    """
+    # دریافت منوی هفتگی
+    weekly_menu = Menu.query.all()
+    
+    if not weekly_menu or len(weekly_menu) == 0:
+        # اگر منویی وجود ندارد، نیازی به بررسی نیست
+        return
+    
+    # تاریخ امروز
+    today = datetime.datetime.now()
+    current_jalali_date = jdatetime.date.fromgregorian(date=today.date())
+    
+    # محاسبه شنبه این هفته (روز اول هفته)
+    # در تقویم شمسی، شنبه روز اول هفته (۰) است
+    current_weekday = current_jalali_date.weekday()
+    days_to_saturday = current_weekday  # تعداد روزهایی که باید به عقب برگردیم تا به شنبه برسیم
+    
+    # محاسبه شنبه این هفته
+    saturday_date = current_jalali_date - jdatetime.timedelta(days=days_to_saturday)
+    
+    # محاسبه شنبه هفته آینده
+    next_saturday_date = saturday_date + jdatetime.timedelta(days=7)
+    
+    # محاسبه جمعه هفته جاری
+    friday_date = saturday_date + jdatetime.timedelta(days=6)
+    
+    # اگر امروز جمعه هفته جاری یا بعد از آن است، باید هفته‌ها به‌روزرسانی شوند
+    if current_jalali_date >= friday_date:
+        print(f"✓ به‌روزرسانی خودکار هفته‌ها - تاریخ فعلی: {current_jalali_date}")
+        print(f"✓ هفته جاری به پایان رسیده (جمعه: {friday_date})")
+        print(f"✓ هفته آینده ({next_saturday_date}) به هفته جاری تبدیل می‌شود")
+        
+        try:
+            # دریافت منوی هفته آینده
+            next_week_menus = []
+            for menu_item in Menu.query.all():
+                # بررسی اینکه آیا این آیتم منو مربوط به هفته آینده است
+                if "_next" in menu_item.day:
+                    next_week_menus.append(menu_item)
+            
+            # ذخیره منوی هفته آینده برای کپی کردن به هفته جاری
+            next_week_menu = {}
+            for menu_item in next_week_menus:
+                # استخراج روز بدون پسوند "_next"
+                day = menu_item.day.replace("_next", "")
+                # ذخیره داده‌های منو
+                next_week_menu[day] = menu_item.meal_data
+                # حذف منوی هفته آینده فعلی
+                db.session.delete(menu_item)
+            
+            # به‌روزرسانی منوی هفته جاری با منوی هفته آینده
+            current_week_days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
+            for day in current_week_days:
+                day_menu = Menu.query.filter_by(day=day).first()
+                if day_menu and day in next_week_menu:
+                    day_menu.meal_data = next_week_menu[day]
+                    db.session.add(day_menu)
+            
+            # ایجاد منوی هفته آینده جدید با کپی از منوی هفته جاری
+            for day in current_week_days:
+                day_menu = Menu.query.filter_by(day=day).first()
+                if day_menu:
+                    # بررسی اینکه آیا منوی هفته آینده قبلاً وجود دارد
+                    next_day_menu = Menu.query.filter_by(day=f"{day}_next").first()
+                    if next_day_menu:
+                        # به‌روزرسانی منوی موجود
+                        next_day_menu.meal_data = day_menu.meal_data
+                        db.session.add(next_day_menu)
+                    else:
+                        # ایجاد منوی هفته آینده جدید
+                        new_menu = Menu(
+                            day=f"{day}_next",
+                            meal_data=day_menu.meal_data
+                        )
+                        db.session.add(new_menu)
+            
+            db.session.commit()
+            print("✓ به‌روزرسانی هفته‌ها با موفقیت انجام شد")
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"✗ خطا در به‌روزرسانی هفته‌ها: {str(e)}")
 
 @app.route('/menu')
 @login_required
 def menu():
+    # بررسی و به‌روزرسانی خودکار هفته‌ها
+    update_week_schedule()
+    
     # گرفتن پارامتر هفته از URL (اگر وجود داشته باشد)
     week_offset = request.args.get('week', '0')
     try:
@@ -257,12 +356,23 @@ def menu():
     elif week_offset > 1:
         week_offset = 1
     
-    # دریافت منوی هفتگی
-    weekly_menu = Menu.query.all()
+    # دریافت منوی هفتگی بر اساس هفته انتخاب شده
+    if week_offset == 1:  # هفته آینده
+        # تمام منوهایی که در نام آنها "_next" وجود دارد
+        weekly_menu = Menu.query.filter(Menu.day.like("%_next")).all()
+        # اصلاح نام روزها برای نمایش بهتر (حذف پسوند "_next")
+        for menu_item in weekly_menu:
+            menu_item.display_day = menu_item.day.replace("_next", "")
+    else:  # هفته جاری
+        # تمام منوهایی که "_next" در نام آنها وجود ندارد
+        weekly_menu = Menu.query.filter(~Menu.day.like("%_next")).all()
+        # تنظیم نام نمایشی یکسان با نام واقعی
+        for menu_item in weekly_menu:
+            menu_item.display_day = menu_item.day
     
     # مرتب‌سازی منوی هفتگی بر اساس ترتیب روزهای هفته
     day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
-    weekly_menu.sort(key=lambda x: day_order.get(x.day, 7))
+    weekly_menu.sort(key=lambda x: day_order.get(x.display_day, 7))
     
     # محاسبه تاریخ‌های شمسی هفته جاری یا آینده
     today = datetime.datetime.now()
@@ -431,6 +541,16 @@ def reserve_all_day():
         flash('اطلاعات دانشجویی شما یافت نشد', 'danger')
         return redirect(url_for('menu', week=week_offset))
     
+    # دریافت منوی روز مورد نظر با توجه به هفته انتخاب شده
+    if week_offset == 1:  # هفته آینده
+        # بررسی اینکه آیا این روز "هفته آینده" هست یا نه
+        if "_next" not in day:
+            day = f"{day}_next"
+    else:  # هفته جاری
+        # بررسی اینکه آیا این روز بدون پسوند "_next" است
+        if "_next" in day:
+            day = day.replace("_next", "")
+            
     # دریافت منوی روز مورد نظر
     day_menu = Menu.query.filter_by(day=day).first()
     if not day_menu:

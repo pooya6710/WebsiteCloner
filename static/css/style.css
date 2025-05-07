@@ -129,11 +129,12 @@ a:hover {
 }
 
 .dropdown-menu {
-    z-index: 10000 !important; /* افزایش z-index به مقدار بسیار بالاتر */
+    z-index: 999999 !important; /* افزایش z-index به مقدار بسیار بالاتر */
     background-color: var(--primary-dark);
     border: 1px solid var(--secondary-color);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    position: absolute;
+    position: absolute !important;
+    transform: none !important;
 }
 
 .dropdown-item {
@@ -149,6 +150,8 @@ a:hover {
 .navbar .dropdown-menu {
     margin-top: 0;
     position: absolute !important;
+    top: 100% !important;
+    z-index: 999999 !important;
 }
 
 /* اطمینان از نمایش مناسب منوهای کشویی */
@@ -157,6 +160,7 @@ a:hover {
     opacity: 1 !important; 
     visibility: visible !important;
     transform: none !important;
+    pointer-events: auto !important;
 }
 
 /* اضافه کردن z-index به المان‌های ثابت */

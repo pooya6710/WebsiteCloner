@@ -162,15 +162,7 @@
                 <div class="dashboard-stats">
                     <div class="text-center">
                         <i class="bi bi-check-circle-fill stat-icon"></i>
-                        <h3 class="stat-value">
-                            {% set delivered_count = 0 %}
-                            {% for reservation in reservations %}
-                                {% if reservation.delivered == 1 %}
-                                    {% set delivered_count = delivered_count + 1 %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ delivered_count }}
-                        </h3>
+                        <h3 class="stat-value">{{ delivered_count }}</h3>
                         <p class="stat-label">تحویل شده</p>
                     </div>
                 </div>

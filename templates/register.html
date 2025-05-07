@@ -324,7 +324,9 @@
         }
         
         // نمایش و مخفی کردن رمز عبور
-        togglePasswordBtn.addEventListener('click', function() {
+        togglePasswordBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // جلوگیری از submit شدن فرم با کلیک روی دکمه
+            
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 togglePasswordBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
