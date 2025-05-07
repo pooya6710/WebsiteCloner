@@ -140,7 +140,7 @@
                                 <tbody>
                                     {% for day_item in weekly_menu %}
                                     <tr>
-                                        <td><strong>{{ days[day_item.display_day] }}</strong></td>
+                                        <td><strong>{% if day_item.day.endswith('_next') %}{{ days[day_item.display_day] }} (هفته آینده){% else %}{{ days[day_item.display_day] }}{% endif %}</strong></td>
                                         <td>
                                             {% if day_item.meal_data.breakfast and day_item.meal_data.breakfast|length > 0 %}
                                                 {% set food = day_item.meal_data.breakfast[0] %}

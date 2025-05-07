@@ -1005,6 +1005,15 @@ def admin_reservations():
     # گروه‌بندی رزروها بر اساس روز
     days = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
     
+    # محاسبه تعداد رزروهای تحویل داده شده و منتظر تحویل
+    total_count = Reservation.query.count()
+    delivered_count = Reservation.query.filter(Reservation.delivered == 1).count()
+    pending_count = Reservation.query.filter(Reservation.delivered == 0).count()
+    
+    # محاسبه مجموع هزینه‌های رزرو شده و تحویل شده
+    total_reserved_cost = sum(r.food_price for r in Reservation.query.all())
+    total_delivered_cost = sum(r.food_price for r in Reservation.query.filter(Reservation.delivered == 1).all())
+    
     # ارسال تمام داده‌های مورد نیاز به قالب
     return render_template('admin_reservations.html', 
                           reservations=reservations,
@@ -1015,6 +1024,11 @@ def admin_reservations():
                           feeding_code=feeding_code,
                           day_filter=day_filter,
                           meal_filter=meal_filter,
+                          total_count=total_count,
+                          delivered_count=delivered_count,
+                          pending_count=pending_count,
+                          total_reserved_cost=total_reserved_cost,
+                          total_delivered_cost=total_delivered_cost,
                           gregorian_to_jalali_datetime=gregorian_to_jalali_datetime)
 
 @app.route('/admin/student/<int:student_id>/reservations')
