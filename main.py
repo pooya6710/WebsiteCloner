@@ -244,10 +244,27 @@ def dashboard():
 @app.route('/menu')
 @login_required
 def menu():
+    # گرفتن پارامتر هفته از URL (اگر وجود داشته باشد)
+    week_offset = request.args.get('week', '0')
+    try:
+        week_offset = int(week_offset)
+    except ValueError:
+        week_offset = 0
+    
+    # محدود کردن week_offset به مقادیر معقول (0 = هفته جاری، 1 = هفته آینده)
+    if week_offset < 0:
+        week_offset = 0
+    elif week_offset > 1:
+        week_offset = 1
+    
     # دریافت منوی هفتگی
     weekly_menu = Menu.query.all()
     
-    # محاسبه تاریخ‌های شمسی هفته جاری
+    # مرتب‌سازی منوی هفتگی بر اساس ترتیب روزهای هفته
+    day_order = {"saturday": 0, "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4, "thursday": 5, "friday": 6}
+    weekly_menu.sort(key=lambda x: day_order.get(x.day, 7))
+    
+    # محاسبه تاریخ‌های شمسی هفته جاری یا آینده
     today = datetime.datetime.now()
     current_jalali_date = jdatetime.date.fromgregorian(date=today.date())
     
@@ -256,10 +273,12 @@ def menu():
     current_weekday = current_jalali_date.weekday()
     days_to_saturday = current_weekday  # تعداد روزهایی که باید به عقب برگردیم تا به شنبه برسیم
     
+    # محاسبه شنبه این هفته یا هفته آینده بر اساس پارامتر week_offset
     saturday_date = current_jalali_date - jdatetime.timedelta(days=days_to_saturday)
+    if week_offset > 0:
+        saturday_date = saturday_date + jdatetime.timedelta(days=7*week_offset)
     
     # ایجاد دیکشنری روزهای هفته همراه با تاریخ
-    week_dates = {}
     days_persian = {
         "saturday": "شنبه",
         "sunday": "یکشنبه",
@@ -270,6 +289,7 @@ def menu():
         "friday": "جمعه"
     }
     
+    # لیست روزها به ترتیب
     day_keys = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"]
     
     # ایجاد دیکشنری منظم از روزهای هفته با تاریخ شمسی
@@ -291,7 +311,25 @@ def menu():
         current_date = saturday_date + jdatetime.timedelta(days=i)
         day_dates[day_key] = current_date.strftime("%Y/%m/%d")
     
-    return render_template('menu.html', weekly_menu=weekly_menu, days=days, day_dates=day_dates, meals=meals)
+    # دریافت اطلاعات دانشجو و رزروهای او
+    student = Student.query.filter_by(user_id=str(current_user.id)).first()
+    reservations = []
+    if student:
+        reservations = Reservation.query.filter_by(student_id=student.id).all()
+    
+    # ذخیره رزروهای دانشجو به صورت دیکشنری برای دسترسی سریع‌تر
+    student_reservations = {}
+    for res in reservations:
+        key = f"{res.day}_{res.meal}"
+        student_reservations[key] = res
+    
+    return render_template('menu.html', 
+                           weekly_menu=weekly_menu, 
+                           days=days, 
+                           day_dates=day_dates, 
+                           meals=meals,
+                           week_offset=week_offset,
+                           student_reservations=student_reservations)
 
 @app.route('/reserve', methods=['POST'])
 @login_required

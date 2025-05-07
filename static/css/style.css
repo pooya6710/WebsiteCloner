@@ -129,7 +129,7 @@ a:hover {
 }
 
 .dropdown-menu {
-    z-index: 9999 !important; /* افزایش z-index به مقدار بالاتر */
+    z-index: 10000 !important; /* افزایش z-index به مقدار بسیار بالاتر */
     background-color: var(--primary-dark);
     border: 1px solid var(--secondary-color);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -157,6 +157,27 @@ a:hover {
     opacity: 1 !important; 
     visibility: visible !important;
     transform: none !important;
+}
+
+/* اضافه کردن z-index به المان‌های ثابت */
+.navbar {
+    z-index: 9000 !important;
+}
+
+/* تنظیم پوزیشن منو برای حل مشکل نمایش در موبایل */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        z-index: 10001 !important;
+        background-color: var(--primary-dark);
+        padding: 1rem;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        border: 1px solid var(--secondary-color);
+        border-top: none;
+    }
 }
 
 .modal-backdrop {

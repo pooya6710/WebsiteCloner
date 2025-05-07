@@ -236,7 +236,9 @@
 {% block scripts %}
 <!-- جاوااسکریپت اضافی برای صفحه ثبت‌نام -->
 <script>
+    // این کد به طور کامل بازنویسی شده است
     document.addEventListener('DOMContentLoaded', function() {
+        // انتخاب المان‌های مورد نیاز
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirm_password');
         const togglePasswordBtn = document.getElementById('togglePassword');
@@ -246,36 +248,39 @@
         const submitBtn = document.getElementById('submitBtn');
         const registerForm = document.getElementById('registerForm');
         
-        // نمایش و مخفی کردن رمز عبور
-        togglePasswordBtn.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                togglePasswordBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
-                togglePasswordBtn.title = 'پنهان کردن رمز عبور';
-            } else {
-                passwordInput.type = 'password';
-                togglePasswordBtn.innerHTML = '<i class="bi bi-eye"></i>';
-                togglePasswordBtn.title = 'نمایش رمز عبور';
-            }
-        });
+        // تنظیم حالت اولیه
+        passwordStrength.style.width = '0%';
+        passwordStrength.style.backgroundColor = '#e9ecef';
+        strengthText.textContent = 'قدرت رمز عبور: وارد نشده';
+        strengthText.style.color = '#e9ecef';
         
-        // بررسی قدرت رمز عبور
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
+        // تابع برای به‌روزرسانی قدرت رمز عبور
+        function updatePasswordStrength() {
+            // دریافت مقدار رمز عبور
+            const password = passwordInput.value || '';
+            
+            // متغیرهای مورد نیاز
             let strength = 0;
             let status = '';
             let color = '';
             
-            if (!password || password.trim() === '') {
+            console.log("Password length:", password.length);
+            
+            // بررسی خالی بودن رمز عبور
+            if (password.length === 0) {
                 status = 'وارد نشده';
                 color = '#e9ecef';
                 strength = 0;
-            } else if (password.length < 6) {
+            } 
+            // بررسی طول رمز عبور
+            else if (password.length < 6) {
                 status = 'ضعیف';
                 color = '#dc3545';
                 strength = 25;
-            } else {
-                // افزایش قدرت بر اساس طول
+            } 
+            // ارزیابی قدرت رمز عبور
+            else {
+                // امتیاز اولیه برای طول کافی
                 strength += 25;
                 
                 // بررسی وجود حروف بزرگ و کوچک
@@ -309,34 +314,33 @@
                 }
             }
             
+            console.log("Strength:", strength, "Status:", status, "Color:", color);
+            
             // نمایش نتیجه
             passwordStrength.style.width = strength + '%';
             passwordStrength.style.backgroundColor = color;
-            
-            if (password && password.trim() !== '') {
-                strengthText.textContent = 'قدرت رمز عبور: ' + status;
-            } else {
-                strengthText.textContent = 'قدرت رمز عبور: وارد نشده';
-            }
+            strengthText.textContent = 'قدرت رمز عبور: ' + status;
             strengthText.style.color = color;
-        });
+        }
         
-        // فراخوانی اولیه برای اطمینان از نمایش صحیح
-        passwordInput.dispatchEvent(new Event('input'));
-        
-        // بررسی تطابق رمز عبور
-        confirmPasswordInput.addEventListener('input', function() {
-            if (this.value !== passwordInput.value) {
-                mismatchText.classList.remove('d-none');
-                this.setCustomValidity('رمز عبور مطابقت ندارد');
+        // نمایش و مخفی کردن رمز عبور
+        togglePasswordBtn.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePasswordBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                togglePasswordBtn.title = 'پنهان کردن رمز عبور';
             } else {
-                mismatchText.classList.add('d-none');
-                this.setCustomValidity('');
+                passwordInput.type = 'password';
+                togglePasswordBtn.innerHTML = '<i class="bi bi-eye"></i>';
+                togglePasswordBtn.title = 'نمایش رمز عبور';
             }
         });
         
-        // بررسی تطابق رمز عبور هنگام تغییر رمز اصلی
+        // افزودن رویداد ورودی به فیلد رمز عبور
         passwordInput.addEventListener('input', function() {
+            updatePasswordStrength();
+            
+            // بررسی تطابق رمز عبور
             if (confirmPasswordInput.value) {
                 if (this.value !== confirmPasswordInput.value) {
                     mismatchText.classList.remove('d-none');
@@ -348,14 +352,30 @@
             }
         });
         
+        // افزودن رویداد ورودی به فیلد تأیید رمز عبور
+        confirmPasswordInput.addEventListener('input', function() {
+            if (this.value !== passwordInput.value) {
+                mismatchText.classList.remove('d-none');
+                this.setCustomValidity('رمز عبور مطابقت ندارد');
+            } else {
+                mismatchText.classList.add('d-none');
+                this.setCustomValidity('');
+            }
+        });
+        
         // اعتبارسنجی فرم قبل از ارسال
         registerForm.addEventListener('submit', function(event) {
+            updatePasswordStrength();
+            
             if (passwordInput.value !== confirmPasswordInput.value) {
                 event.preventDefault();
                 mismatchText.classList.remove('d-none');
                 confirmPasswordInput.setCustomValidity('رمز عبور مطابقت ندارد');
             }
         });
+        
+        // فراخوانی اولیه برای اطمینان از نمایش صحیح
+        setTimeout(updatePasswordStrength, 100);
     });
 </script>
 {% endblock %}
